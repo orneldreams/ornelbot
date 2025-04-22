@@ -7,7 +7,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-ENV PORT=8501 
- # utile localement si PORT n'est pas défini
+# Juste à titre de fallback local (non requis si Railway gère déjà PORT)
+ENV PORT=8501  
 
-CMD ["sh", "-c", "streamlit run app.py --server.port=$PORT --server.address=0.0.0.0"]
+# ✅ Bonne version du CMD :
+CMD ["sh", "-c", "streamlit run app.py --server.port=${PORT:-8501} --server.address=0.0.0.0"]
