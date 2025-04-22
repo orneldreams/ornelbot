@@ -44,8 +44,12 @@ if not avatar_base64:
 
 st.markdown("<h1 style='text-align:center;'>OrnelBot</h1>", unsafe_allow_html=True)
 
-# === Message d’accueil ===
-if os.path.exists(avatar_path) and "chat_history" not in st.session_state:
+# === État session ===
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
+# === Message d’accueil (affiché une seule fois) ===
+if len(st.session_state.chat_history) == 0:
     st.markdown(f"""
     <div class="chat-container">
         <img src="data:image/png;base64,{avatar_base64}" class="chat-avatar">
@@ -55,10 +59,6 @@ if os.path.exists(avatar_path) and "chat_history" not in st.session_state:
         </div>
     </div>
     """, unsafe_allow_html=True)
-
-# === État session ===
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
 
 # === Affichage historique ===
 for message in st.session_state.chat_history:
@@ -80,14 +80,18 @@ for message in st.session_state.chat_history:
         </div>
         """, unsafe_allow_html=True)
 
-# === Champ input natif de chat ===
-new_input = st.chat_input("Tapez votre message ici...")
+# === Chat input (corrigé) ===
+if "user_input" not in st.session_state:
+    st.session_state.user_input = ""
 
-if new_input:
-    st.session_state.chat_history.append({"role": "user", "content": new_input})
-    prompt = build_prompt(profile, st.session_state.chat_history, new_input)
+user_input = st.chat_input("Tapez votre message ici...")
+
+if user_input and user_input.strip() != "":
+    st.session_state.chat_history.append({"role": "user", "content": user_input})
+    prompt = build_prompt(profile, st.session_state.chat_history, user_input)
     response = generate_response(prompt)
     st.session_state.chat_history.append({"role": "assistant", "content": response})
+    st.session_state.user_input = ""  # Force le vidage du champ input
 
 # === Footer ===
 st.markdown("""
