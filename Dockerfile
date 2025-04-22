@@ -1,18 +1,16 @@
-# Utiliser une image Python officielle
 FROM python:3.11-slim
 
 # Définir le répertoire de travail
 WORKDIR /app
 
-# Copier les fichiers nécessaires
+# Copier les fichiers requis
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copier le reste de l'application
 COPY . .
 
-# Exposer le port (Streamlit par défaut : 8501)
-EXPOSE 8501
+# Définir le port par défaut (utile en local)
+ENV PORT=8501
 
-# Commande de démarrage
-CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.enableCORS=false"]
+# Commande de démarrage avec interprétation de la variable d’environnement
+CMD streamlit run app.py --server.port=${PORT} --server.address=0.0.0.0
