@@ -7,7 +7,6 @@ from core.prompt_builder import build_prompt
 from core.groq_client import generate_response
 
 # === Fonctions utilitaires ===
-
 def load_profile():
     with open("profile.json", "r", encoding="utf-8") as f:
         return json.load(f)
@@ -39,21 +38,14 @@ st.markdown("""
 
 # === Avatar & titre ===
 avatar_path = "assets/avatar.png"
-if os.path.exists(avatar_path):
-    avatar_base64 = get_base64_image(avatar_path)
-    st.markdown(f"""
-        <div style='text-align: center; margin-bottom: 10px;'>
-            <img src='data:image/png;base64,{avatar_base64}' width='100' style='border-radius: 50%;'/>
-        </div>
-    """, unsafe_allow_html=True)
-else:
-    avatar_base64 = ""
+avatar_base64 = get_base64_image(avatar_path) if os.path.exists(avatar_path) else ""
+if not avatar_base64:
     st.warning("Avatar manquant.")
 
 st.markdown("<h1 style='text-align:center;'>OrnelBot</h1>", unsafe_allow_html=True)
 
 # === Message d’accueil ===
-if os.path.exists(avatar_path):
+if os.path.exists(avatar_path) and "chat_history" not in st.session_state:
     st.markdown(f"""
     <div class="chat-container">
         <img src="data:image/png;base64,{avatar_base64}" class="chat-avatar">
@@ -88,18 +80,14 @@ for message in st.session_state.chat_history:
         </div>
         """, unsafe_allow_html=True)
 
-# === Champ input fiable avec filtrage des doublons ===
-user_input = st.chat_input("Tapez votre message ici...")
+# === Champ input natif de chat ===
+new_input = st.chat_input("Tapez votre message ici...")
 
-if user_input:
-    # Évite la répétition en cas de bug de chat_input
-    last_user_msg = st.session_state.chat_history[-1]["content"] if st.session_state.chat_history and st.session_state.chat_history[-1]["role"] == "user" else None
-    if user_input != last_user_msg:
-        prompt = build_prompt(profile, st.session_state.chat_history, user_input)
-        response = generate_response(prompt)
-
-        st.session_state.chat_history.append({"role": "user", "content": user_input})
-        st.session_state.chat_history.append({"role": "assistant", "content": response})
+if new_input:
+    st.session_state.chat_history.append({"role": "user", "content": new_input})
+    prompt = build_prompt(profile, st.session_state.chat_history, new_input)
+    response = generate_response(prompt)
+    st.session_state.chat_history.append({"role": "assistant", "content": response})
 
 # === Footer ===
 st.markdown("""
