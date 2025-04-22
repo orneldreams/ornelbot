@@ -88,17 +88,18 @@ for message in st.session_state.chat_history:
         </div>
         """, unsafe_allow_html=True)
 
-# === Champ input natif de chat ===
-raw_input = st.chat_input("Tapez votre message ici...")
+# === Champ input fiable avec filtrage des doublons ===
+user_input = st.chat_input("Tapez votre message ici...")
 
-# ⚠️ Fix : on garde une copie AVANT qu’elle soit potentiellement réinitialisée
-if raw_input is not None and raw_input.strip():
-    current_input = raw_input.strip()
-    prompt = build_prompt(profile, st.session_state.chat_history, current_input)
-    response = generate_response(prompt)
+if user_input:
+    # Évite la répétition en cas de bug de chat_input
+    last_user_msg = st.session_state.chat_history[-1]["content"] if st.session_state.chat_history and st.session_state.chat_history[-1]["role"] == "user" else None
+    if user_input != last_user_msg:
+        prompt = build_prompt(profile, st.session_state.chat_history, user_input)
+        response = generate_response(prompt)
 
-    st.session_state.chat_history.append({"role": "user", "content": current_input})
-    st.session_state.chat_history.append({"role": "assistant", "content": response})
+        st.session_state.chat_history.append({"role": "user", "content": user_input})
+        st.session_state.chat_history.append({"role": "assistant", "content": response})
 
 # === Footer ===
 st.markdown("""
