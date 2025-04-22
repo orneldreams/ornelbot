@@ -88,12 +88,10 @@ for message in st.session_state.chat_history:
         </div>
         """, unsafe_allow_html=True)
 
-# === Champ input avec bouton Envoyer ===
-with st.form(key="chat_form", clear_on_submit=True):
-    user_input = st.text_input("Tapez votre message...", key="user_input")
-    submitted = st.form_submit_button("Envoyer")
+# === Champ input natif de chat ===
+user_input = st.chat_input("Tapez votre message ici...")
 
-if submitted and user_input:
+if user_input:
     prompt = build_prompt(profile, st.session_state.chat_history, user_input)
     response = generate_response(prompt)
 
