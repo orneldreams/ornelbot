@@ -1,6 +1,7 @@
 # OrnelBot – Chatbot personnel avec Streamlit & Groq
 
-[![CI/CD](https://github.com/orneldreams/ornelbot/actions/workflows/main.yml/badge.svg)](https://github.com/orneldreams/ornelbot/actions)
+![CI/CD](https://github.com/orneldreams/ornelbot/actions/workflows/python-app.yml/badge.svg)
+
 
 Bienvenue sur **OrnelBot**, un assistant intelligent développé par **Ornel Rony DIFFO**.  
 Ce chatbot est un projet personnel interactif, stylisé avec CSS, propulsé par l'API **Groq** (LLaMA 3) et conçu avec **Streamlit**.
