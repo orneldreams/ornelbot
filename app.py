@@ -89,13 +89,15 @@ for message in st.session_state.chat_history:
         """, unsafe_allow_html=True)
 
 # === Champ input natif de chat ===
-user_input = st.chat_input("Tapez votre message ici...")
+raw_input = st.chat_input("Tapez votre message ici...")
 
-if user_input:
-    prompt = build_prompt(profile, st.session_state.chat_history, user_input)
+# ⚠️ Fix : on garde une copie AVANT qu’elle soit potentiellement réinitialisée
+if raw_input is not None and raw_input.strip():
+    current_input = raw_input.strip()
+    prompt = build_prompt(profile, st.session_state.chat_history, current_input)
     response = generate_response(prompt)
 
-    st.session_state.chat_history.append({"role": "user", "content": user_input})
+    st.session_state.chat_history.append({"role": "user", "content": current_input})
     st.session_state.chat_history.append({"role": "assistant", "content": response})
 
 # === Footer ===
