@@ -12,5 +12,5 @@ COPY . .
 # Définir le port par défaut (utile en local)
 ENV PORT=8501
 
-# Commande de démarrage avec interprétation de la variable d’environnement
-CMD streamlit run app.py --server.port=${PORT} --server.address=0.0.0.0
+# Commande de démarrage Streamlit avec les bonnes options
+CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.enableCORS=false", "--server.enableXsrfProtection=false"]
