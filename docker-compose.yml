@@ -1,0 +1,12 @@
+
+services:
+  ornelbot:
+    build: .
+    container_name: ornelbot_app
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    command: streamlit run app.py --server.port=8501 --server.enableCORS=false
