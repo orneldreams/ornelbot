@@ -7,6 +7,7 @@ from core.prompt_builder import build_prompt
 from core.groq_client import generate_response
 
 # === Fonctions utilitaires ===
+
 def load_profile():
     with open("profile.json", "r", encoding="utf-8") as f:
         return json.load(f)
@@ -38,18 +39,21 @@ st.markdown("""
 
 # === Avatar & titre ===
 avatar_path = "assets/avatar.png"
-avatar_base64 = get_base64_image(avatar_path) if os.path.exists(avatar_path) else ""
-if not avatar_base64:
+if os.path.exists(avatar_path):
+    avatar_base64 = get_base64_image(avatar_path)
+    st.markdown(f"""
+        <div style='text-align: center; margin-bottom: 10px;'>
+            <img src='data:image/png;base64,{avatar_base64}' width='100' style='border-radius: 50%;'/>
+        </div>
+    """, unsafe_allow_html=True)
+else:
+    avatar_base64 = ""
     st.warning("Avatar manquant.")
 
 st.markdown("<h1 style='text-align:center;'>OrnelBot</h1>", unsafe_allow_html=True)
 
-# === État session ===
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
-
-# === Message d’accueil (affiché une seule fois) ===
-if len(st.session_state.chat_history) == 0:
+# === Message d’accueil ===
+if os.path.exists(avatar_path):
     st.markdown(f"""
     <div class="chat-container">
         <img src="data:image/png;base64,{avatar_base64}" class="chat-avatar">
@@ -59,6 +63,10 @@ if len(st.session_state.chat_history) == 0:
         </div>
     </div>
     """, unsafe_allow_html=True)
+
+# === État session ===
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
 
 # === Affichage historique ===
 for message in st.session_state.chat_history:
@@ -80,18 +88,17 @@ for message in st.session_state.chat_history:
         </div>
         """, unsafe_allow_html=True)
 
-# === Chat input (corrigé) ===
-if "user_input" not in st.session_state:
-    st.session_state.user_input = ""
+# === Champ input avec bouton Envoyer ===
+with st.form(key="chat_form", clear_on_submit=True):
+    user_input = st.text_input("Tapez votre message...", key="user_input")
+    submitted = st.form_submit_button("Envoyer")
 
-user_input = st.chat_input("Tapez votre message ici...")
-
-if user_input and user_input.strip() != "":
-    st.session_state.chat_history.append({"role": "user", "content": user_input})
+if submitted and user_input:
     prompt = build_prompt(profile, st.session_state.chat_history, user_input)
     response = generate_response(prompt)
+
+    st.session_state.chat_history.append({"role": "user", "content": user_input})
     st.session_state.chat_history.append({"role": "assistant", "content": response})
-    st.session_state.user_input = ""  # Force le vidage du champ input
 
 # === Footer ===
 st.markdown("""
