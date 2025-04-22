@@ -1,15 +1,16 @@
 import os
 import requests
-from dotenv import load_dotenv
 
-# Charger les variables d'environnement depuis .env
-load_dotenv()
+# Charger les variables d'environnement en local uniquement
+if os.getenv("RAILWAY_ENVIRONMENT") is None:
+    from dotenv import load_dotenv
+    load_dotenv()
+
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-# Fonction pour générer une réponse depuis le modèle LLaMA3 via l'API Groq
 def generate_response(prompt: str) -> str:
     if not GROQ_API_KEY:
-        return "❌ Erreur : la clé API GROQ est introuvable. Vérifie le fichier .env."
+        return "❌ Erreur : la clé API GROQ est introuvable."
 
     headers = {
         "Authorization": f"Bearer {GROQ_API_KEY}",
@@ -31,7 +32,7 @@ def generate_response(prompt: str) -> str:
             json=payload
         )
         response.raise_for_status()
-        return response.json()["choices"][0]["message"]["content"]
+        return response.json()["choices"][0]["message"]["content"].strip()
 
     except requests.exceptions.RequestException as e:
-        return f"❌ Erreur de requête : {e}"
+        return f"❌ Erreur lors de la requête vers l'API Groq : {e}"
