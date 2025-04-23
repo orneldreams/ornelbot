@@ -33,26 +33,26 @@ user_avatar_path = "assets/user_avatar.png"
 bot_avatar = f"data:image/png;base64,{get_base64_image(bot_avatar_path)}" if os.path.exists(bot_avatar_path) else None
 user_avatar = f"data:image/png;base64,{get_base64_image(user_avatar_path)}" if os.path.exists(user_avatar_path) else None
 
-# === Sidebar ===
+# === Sidebar façon ChatGPT ===
 st.sidebar.header("💬 Discussions")
 chat_files = list_chats()
 
 for chat in chat_files:
-    with st.sidebar.expander(chat["title"], expanded=False):
-        if st.button("🗂️ Charger", key=f"load_{chat['filename']}"):
-            data = load_chat(chat["filename"])
-            st.session_state.chat_history = data["messages"]
-            st.session_state.greeted = True
-        if st.button("✏️ Renommer", key=f"rename_{chat['filename']}"):
-            new_title = st.text_input("Nouveau nom :", key=f"new_title_{chat['filename']}")
-            if new_title:
-                rename_chat(chat["filename"], new_title)
-                st.experimental_rerun()
-        if st.button("🗑️ Supprimer", key=f"delete_{chat['filename']}"):
-            delete_chat(chat["filename"])
+    col1, col2, col3 = st.sidebar.columns([6, 2, 2], gap="small")
+    if col1.button(chat["title"], key=f"load_{chat['filename']}"):
+        data = load_chat(chat["filename"])
+        st.session_state.chat_history = data["messages"]
+        st.session_state.greeted = True
+    if col2.button("✏️", key=f"rename_{chat['filename']}"):
+        new_title = st.text_input("Renommer la discussion :", key=f"new_title_{chat['filename']}")
+        if new_title:
+            rename_chat(chat["filename"], new_title)
             st.experimental_rerun()
+    if col3.button("🗑️", key=f"delete_{chat['filename']}"):
+        delete_chat(chat["filename"])
+        st.experimental_rerun()
 
-if st.sidebar.button("🆕 Nouvelle discussion"):
+if st.sidebar.button("➕ Nouvelle discussion"):
     st.session_state.chat_history = []
     st.session_state.last_input = ""
     st.session_state.greeted = False
