@@ -6,7 +6,7 @@ from datetime import datetime
 from PIL import Image
 from core.prompt_builder import build_prompt
 from core.groq_client import generate_response
-from core.chat_manager import list_chats, load_chat, save_chat
+from core.chat_manager import list_chats, load_chat, save_chat, delete_chat, rename_chat
 
 # === Fonctions utilitaires ===
 def load_profile():
@@ -33,37 +33,29 @@ user_avatar_path = "assets/user_avatar.png"
 bot_avatar = f"data:image/png;base64,{get_base64_image(bot_avatar_path)}" if os.path.exists(bot_avatar_path) else None
 user_avatar = f"data:image/png;base64,{get_base64_image(user_avatar_path)}" if os.path.exists(user_avatar_path) else None
 
-# === Sidebar dynamique comme ChatGPT ===
+# === Sidebar ===
 st.sidebar.header("💬 Discussions")
-all_chats = list_chats()
+chat_files = list_chats()
 
-# Regroupement par jour
-from collections import defaultdict
-from datetime import date
-
-chat_by_day = defaultdict(list)
-for chat in all_chats:
-    label = "Aujourd'hui" if chat["date"].date() == date.today() else chat["date"].strftime("%d %B %Y")
-    chat_by_day[label].append(chat)
-
-# Affichage dans la sidebar
-clicked_chat = None
-for group, items in chat_by_day.items():
-    st.sidebar.markdown(f"### {group}")
-    for chat in items:
-        if st.sidebar.button(chat["title"], key=chat["filename"]):
-            clicked_chat = chat
+for chat in chat_files:
+    with st.sidebar.expander(chat["title"], expanded=False):
+        if st.button("🗂️ Charger", key=f"load_{chat['filename']}"):
+            data = load_chat(chat["filename"])
+            st.session_state.chat_history = data["messages"]
+            st.session_state.greeted = True
+        if st.button("✏️ Renommer", key=f"rename_{chat['filename']}"):
+            new_title = st.text_input("Nouveau nom :", key=f"new_title_{chat['filename']}")
+            if new_title:
+                rename_chat(chat["filename"], new_title)
+                st.experimental_rerun()
+        if st.button("🗑️ Supprimer", key=f"delete_{chat['filename']}"):
+            delete_chat(chat["filename"])
+            st.experimental_rerun()
 
 if st.sidebar.button("🆕 Nouvelle discussion"):
     st.session_state.chat_history = []
     st.session_state.last_input = ""
     st.session_state.greeted = False
-    st.experimental_rerun()
-
-if clicked_chat:
-    data = load_chat(clicked_chat["filename"])
-    st.session_state.chat_history = data["messages"]
-    st.session_state.greeted = True
 
 # === Header fixe avec avatar et réseaux ===
 if bot_avatar:
@@ -123,7 +115,7 @@ if user_input and user_input.strip() and user_input != st.session_state.last_inp
     with st.chat_message("assistant", avatar=bot_avatar):
         st.markdown(response)
 
-# === Sauvegarde automatique ===
+# === Sauvegarde automatique après chaque échange ===
 if st.session_state.chat_history:
     title = st.session_state.chat_history[0]["content"][:30].replace(" ", "_").strip(".,")
     save_chat(title, st.session_state.chat_history)
@@ -136,7 +128,7 @@ st.markdown("""
 </p>
 """, unsafe_allow_html=True)
 
-# === Scroll auto + bouton flottant ===
+# === Scroll auto intelligent + bouton flottant ===
 st.markdown("""
 <style>
 .scroll-down-btn {
