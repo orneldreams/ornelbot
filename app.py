@@ -124,7 +124,7 @@ const chatContainer = document.querySelector('section.main');
 
 const toggleScrollButton = () => {
     if (!chatContainer) return;
-    const isAtBottom = chatContainer.scrollHeight - chatContainer.scrollTop <= chatContainer.clientHeight + 200;
+    const isAtBottom = chatContainer.scrollHeight - chatContainer.scrollTop <= chatContainer.clientHeight + 100;
     scrollBtn.style.display = isAtBottom ? "none" : "block";
 };
 
