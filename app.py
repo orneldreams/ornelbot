@@ -7,7 +7,6 @@ from core.prompt_builder import build_prompt
 from core.groq_client import generate_response
 
 # === Fonctions utilitaires ===
-
 def load_profile():
     with open("profile.json", "r", encoding="utf-8") as f:
         return json.load(f)
@@ -27,30 +26,26 @@ profile = load_profile()
 
 # === Chargement des avatars ===
 bot_avatar_path = "assets/avatar.png"
-user_avatar_path = "assets/user_avatar.png"  # utilisé uniquement si présent
+user_avatar_path = "assets/user_avatar.png"  # Optionnel
 
 bot_avatar = f"data:image/png;base64,{get_base64_image(bot_avatar_path)}" if os.path.exists(bot_avatar_path) else None
 user_avatar = f"data:image/png;base64,{get_base64_image(user_avatar_path)}" if os.path.exists(user_avatar_path) else bot_avatar
 
-# === Header FIXE ===
-if bot_avatar:
-    st.markdown(f"""
-    <div class="header-fixed">
-        <img src="{bot_avatar}" />
-        <h1>OrnelBot</h1>
-        <div class="social-links">
-            <a href="https://github.com/tititaya" target="_blank" style="margin-right: 10px;">
-                <img src="https://img.icons8.com/ios-glyphs/30/ffffff/github.png"/>
-            </a>
-            <a href="https://www.linkedin.com/in/ornel-rony-d-01737b267/" target="_blank">
-                <img src="https://img.icons8.com/ios-filled/30/ffffff/linkedin.png"/>
-            </a>
-        </div>
+# === Header fixe avec avatar, titre et liens sociaux ===
+st.markdown(f"""
+<div class="header-fixed">
+    <img src="{bot_avatar}" />
+    <h1>OrnelBot</h1>
+    <div class="social-links">
+        <a href="https://github.com/tititaya" target="_blank" style="margin-right: 10px;">
+            <img src="https://img.icons8.com/ios-glyphs/30/ffffff/github.png"/>
+        </a>
+        <a href="https://www.linkedin.com/in/ornel-rony-d-01737b267/" target="_blank">
+            <img src="https://img.icons8.com/ios-filled/30/ffffff/linkedin.png"/>
+        </a>
     </div>
+</div>
 """, unsafe_allow_html=True)
-
-else:
-    st.warning("Avatar du bot manquant.")
 
 # === Session state ===
 if "chat_history" not in st.session_state:
@@ -60,7 +55,7 @@ if "last_input" not in st.session_state:
 if "greeted" not in st.session_state:
     st.session_state.greeted = False
 
-# === Message d’accueil une seule fois ===
+# === Message d'accueil une seule fois ===
 if not st.session_state.greeted and bot_avatar:
     welcome_message = "Salut ! Je suis OrnelBot. Pose-moi n'importe quelle question sur mes projets, mes compétences ou des sujets généraux."
     st.session_state.chat_history.append({"role": "assistant", "content": welcome_message})
