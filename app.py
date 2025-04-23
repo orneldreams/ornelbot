@@ -21,6 +21,16 @@ def get_base64_image(image_path):
     with open(image_path, "rb") as f:
         return base64.b64encode(f.read()).decode()
 
+def get_first_user_message(chat_history):
+    for msg in chat_history:
+        if msg["role"] == "user":
+            return msg["content"]
+    return "Nouvelle discussion"
+
+def extract_keywords_for_title(text):
+    words = text.replace("\n", " ").strip().split()
+    return "_".join(words[:6]) if words else "Discussion"
+
 # === Initialisation ===
 st.set_page_config(page_title="OrnelBot", page_icon="🤖", layout="centered")
 inject_css()
@@ -131,7 +141,8 @@ if st.session_state.chat_history:
                 json.dump(data, f, ensure_ascii=False, indent=2)
                 f.truncate()
     else:
-        title = st.session_state.chat_history[0]["content"][:30].replace(" ", "_").strip(".,")
+        first_msg = get_first_user_message(st.session_state.chat_history)
+        title = extract_keywords_for_title(first_msg)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{timestamp}_{title}.json"
         save_chat(title, st.session_state.chat_history)
