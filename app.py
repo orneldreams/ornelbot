@@ -2,7 +2,7 @@ import streamlit as st
 import json
 import os
 import base64
-from datetime import datetime, date, timedelta
+from datetime import datetime
 from PIL import Image
 import re
 from core.prompt_builder import build_prompt
@@ -43,29 +43,6 @@ def clean_user_input(text):
     text = text.replace("cest", "C'est").replace("Cest", "C'est")
     return text
 
-def format_date_label(d):
-    today = date.today()
-    if d == today:
-        return "Aujourd’hui"
-    elif d == today - timedelta(days=1):
-        return "Hier"
-    elif d >= today - timedelta(days=7):
-        return "7 jours précédents"
-    else:
-        return d.strftime("%d %B %Y")
-
-def insert_date_separator():
-    if "last_displayed_date" not in st.session_state:
-        st.session_state.last_displayed_date = None
-    today = date.today()
-    if st.session_state.last_displayed_date != today:
-        st.session_state.last_displayed_date = today
-        st.markdown(f"""
-        <div style='text-align: center; color: gray; margin: 1em 0;'>
-            🗓️ Aujourd'hui – {today.strftime('%d/%m/%Y')}
-        </div>
-        """, unsafe_allow_html=True)
-
 # === Initialisation ===
 st.set_page_config(page_title="OrnelBot", page_icon="🤖", layout="centered")
 inject_css()
@@ -92,32 +69,23 @@ if "current_chat_filename" not in st.session_state:
 st.sidebar.header("💬 Discussions")
 chat_files = list_chats()
 
-# Group chats by date
-grouped_chats = {}
 for chat in chat_files:
-    date_obj = chat["date"].date() if isinstance(chat["date"], datetime) else date.today()
-    label = format_date_label(date_obj)
-    grouped_chats.setdefault(label, []).append(chat)
-
-for label in grouped_chats:
-    st.sidebar.markdown(f"**{label}**")
-    for chat in grouped_chats[label]:
-        col1, col2, col3 = st.sidebar.columns([6, 2, 2], gap="small")
-        if col1.button(chat["title"], key=f"load_{chat['filename']}"):
-            data = load_chat(chat["filename"])
-            st.session_state.chat_history = data["messages"]
-            st.session_state.greeted = True
-            st.session_state.current_chat_filename = chat["filename"]
-        if col2.button("✏️", key=f"rename_{chat['filename']}"):
-            new_title = st.text_input("Renommer la discussion :", key=f"new_title_{chat['filename']}")
-            if new_title:
-                new_filename = rename_chat(chat["filename"], new_title)
-                if new_filename:
-                    st.session_state.current_chat_filename = new_filename
-                    st.rerun()
-        if col3.button("🗑️", key=f"delete_{chat['filename']}"):
-            delete_chat(chat["filename"])
-            st.rerun()
+    col1, col2, col3 = st.sidebar.columns([6, 2, 2], gap="small")
+    if col1.button(chat["title"], key=f"load_{chat['filename']}"):
+        data = load_chat(chat["filename"])
+        st.session_state.chat_history = data["messages"]
+        st.session_state.greeted = True
+        st.session_state.current_chat_filename = chat["filename"]
+    if col2.button("✏️", key=f"rename_{chat['filename']}"):
+        new_title = st.text_input("Renommer la discussion :", key=f"new_title_{chat['filename']}")
+        if new_title:
+            new_filename = rename_chat(chat["filename"], new_title)
+            if new_filename:
+                st.session_state.current_chat_filename = new_filename
+                st.rerun()
+    if col3.button("🗑️", key=f"delete_{chat['filename']}"):
+        delete_chat(chat["filename"])
+        st.rerun()
 
 if st.sidebar.button("➕ Nouvelle discussion"):
     st.session_state.chat_history = []
@@ -151,8 +119,7 @@ if not st.session_state.greeted and bot_avatar:
     st.session_state.chat_history.append({"role": "assistant", "content": welcome_message})
     st.session_state.greeted = True
 
-# === Affichage historique avec date ===
-insert_date_separator()
+# === Affichage historique ===
 for message in st.session_state.chat_history:
     avatar = bot_avatar if message["role"] == "assistant" else user_avatar
     with st.chat_message(message["role"], avatar=avatar):
