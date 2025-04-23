@@ -2,11 +2,12 @@ import streamlit as st
 import json
 import os
 import base64
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from PIL import Image
 from core.prompt_builder import build_prompt
 from core.groq_client import generate_response
 from core.chat_manager import list_chats, load_chat, save_chat, delete_chat, rename_chat
+from utils.notification import notify_once
 
 # === Fonctions utilitaires ===
 def load_profile():
@@ -20,6 +21,16 @@ def inject_css():
 def get_base64_image(image_path):
     with open(image_path, "rb") as f:
         return base64.b64encode(f.read()).decode()
+
+def get_first_user_message(chat_history):
+    for msg in chat_history:
+        if msg["role"] == "user":
+            return msg["content"]
+    return "Nouvelle discussion"
+
+def extract_keywords_for_title(text):
+    words = text.replace("\n", " ").strip().split()
+    return "_".join(words[:6]) if words else "Discussion"
 
 # === Initialisation ===
 st.set_page_config(page_title="OrnelBot", page_icon="🤖", layout="centered")
@@ -42,6 +53,11 @@ if "greeted" not in st.session_state:
     st.session_state.greeted = False
 if "current_chat_filename" not in st.session_state:
     st.session_state.current_chat_filename = None
+if "chat_saved" not in st.session_state:
+    st.session_state.chat_saved = False
+if "notified" not in st.session_state:
+    notify_once()
+    st.session_state.notified = True
 
 # === Sidebar façon ChatGPT ===
 st.sidebar.header("💬 Discussions")
@@ -54,6 +70,7 @@ for chat in chat_files:
         st.session_state.chat_history = data["messages"]
         st.session_state.greeted = True
         st.session_state.current_chat_filename = chat["filename"]
+        st.session_state.chat_saved = True
     if col2.button("✏️", key=f"rename_{chat['filename']}"):
         new_title = st.text_input("Renommer la discussion :", key=f"new_title_{chat['filename']}")
         if new_title:
@@ -68,6 +85,7 @@ if st.sidebar.button("➕ Nouvelle discussion"):
     st.session_state.last_input = ""
     st.session_state.greeted = False
     st.session_state.current_chat_filename = None
+    st.session_state.chat_saved = False
 
 # === Header fixe avec avatar et réseaux ===
 if bot_avatar:
@@ -119,9 +137,13 @@ if user_input and user_input.strip() and user_input != st.session_state.last_inp
     with st.chat_message("assistant", avatar=bot_avatar):
         st.markdown(response)
 
-# === Sauvegarde automatique après chaque échange ===
-if st.session_state.chat_history:
-    if st.session_state.current_chat_filename:
+    if not st.session_state.chat_saved:
+        first_msg = get_first_user_message(st.session_state.chat_history)
+        title = extract_keywords_for_title(first_msg)
+        filename = save_chat(title, st.session_state.chat_history)
+        st.session_state.current_chat_filename = filename
+        st.session_state.chat_saved = True
+    else:
         path = os.path.join("chats", st.session_state.current_chat_filename)
         if os.path.exists(path):
             with open(path, "r+", encoding="utf-8") as f:
@@ -130,12 +152,6 @@ if st.session_state.chat_history:
                 f.seek(0)
                 json.dump(data, f, ensure_ascii=False, indent=2)
                 f.truncate()
-    else:
-        title = st.session_state.chat_history[0]["content"][:30].replace(" ", "_").strip(".,")
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{timestamp}_{title}.json"
-        save_chat(title, st.session_state.chat_history)
-        st.session_state.current_chat_filename = filename
 
 # === Footer ===
 st.markdown("""
@@ -211,6 +227,3 @@ observer.observe(document.body, { childList: true, subtree: true });
 window.addEventListener("scroll", toggleScrollButton);
 </script>
 """, unsafe_allow_html=True)
-
-
-
