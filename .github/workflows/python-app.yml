@@ -24,5 +24,16 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Run Streamlit check
+    - name: Export Twilio ENV vars
+      run: |
+        echo "TWILIO_SID=${{ secrets.TWILIO_SID }}" >> $GITHUB_ENV
+        echo "TWILIO_AUTH_TOKEN=${{ secrets.TWILIO_AUTH_TOKEN }}" >> $GITHUB_ENV
+        echo "TWILIO_WHATSAPP_NUMBER=${{ secrets.TWILIO_WHATSAPP_NUMBER }}" >> $GITHUB_ENV
+        echo "RECIPIENT_WHATSAPP_NUMBER=${{ secrets.RECIPIENT_WHATSAPP_NUMBER }}" >> $GITHUB_ENV
+
+    - name: Run Streamlit version check
       run: streamlit --version
+
+    - name: Test notification (facultatif)
+      run: |
+        echo " Simulation notification Twilio si utilisée à l'import (notify_once)"

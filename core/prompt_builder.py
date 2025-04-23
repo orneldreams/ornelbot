@@ -1,7 +1,11 @@
 import json
 from langdetect import detect
+from utils.notification import notify_once  # Nouvelle fonction importée
+
 
 def build_prompt(profile: dict, history: list, user_input: str) -> str:
+    notify_once()
+
     # Récupérer les infos essentielles du profil
     intro = profile.get("intro_personnelle", "")
     vision = profile.get("vision", "")
