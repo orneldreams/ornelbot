@@ -59,18 +59,18 @@ if "last_input" not in st.session_state:
 if "greeted" not in st.session_state:
     st.session_state.greeted = False
 
-# === Message d'accueil une seule fois ===
+# === Message d'accueil personnalisé ===
 if not st.session_state.greeted and avatar_base64:
-    welcome_message = "Salut ! Je suis OrnelBot. Pose-moi n'importe quelle question sur mes projets, mes compétences ou des sujets généraux."
-    st.session_state.chat_history.append({"role": "assistant", "content": welcome_message})
+    welcome = "Salut ! Je suis OrnelBot. Pose-moi n’importe quelle question sur mes projets, mes compétences ou des sujets plus généraux."
+    st.session_state.chat_history.append({"role": "assistant", "content": welcome})
     st.session_state.greeted = True
 
-# === Affichage historique ===
+# === Affichage de l'historique ===
 for message in st.session_state.chat_history:
-    with st.chat_message(message["role"]):
+    with st.chat_message(message["role"], avatar=avatar_base64):
         st.markdown(message["content"])
 
-# === Champ de saisie natif avec vérification ===
+# === Champ de saisie avec validation et mise à jour de l'historique ===
 user_input = st.chat_input("Tape ton message ici...")
 
 if user_input and user_input.strip() and user_input != st.session_state.last_input:
@@ -83,9 +83,9 @@ if user_input and user_input.strip() and user_input != st.session_state.last_inp
     st.session_state.chat_history.append({"role": "assistant", "content": response})
     st.session_state.last_input = user_input
 
-    with st.chat_message("user"):
+    with st.chat_message("user", avatar=avatar_base64):
         st.markdown(user_input)
-    with st.chat_message("assistant"):
+    with st.chat_message("assistant", avatar=avatar_base64):
         st.markdown(response)
 
 # === Footer ===
