@@ -46,7 +46,7 @@ if bot_avatar:
             </a>
         </div>
     </div>
-    <div style='height: 140px;'></div> <!-- Padding top for fixed header -->
+    <div style='height: 160px;'></div> <!-- Padding top for fixed header -->
     """, unsafe_allow_html=True)
 else:
     st.warning("Avatar du bot manquant.")
