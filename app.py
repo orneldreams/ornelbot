@@ -33,21 +33,37 @@ user_avatar_path = "assets/user_avatar.png"
 bot_avatar = f"data:image/png;base64,{get_base64_image(bot_avatar_path)}" if os.path.exists(bot_avatar_path) else None
 user_avatar = f"data:image/png;base64,{get_base64_image(user_avatar_path)}" if os.path.exists(user_avatar_path) else None
 
-# === Sidebar ===
+# === Sidebar dynamique comme ChatGPT ===
 st.sidebar.header("💬 Discussions")
-chat_files = list_chats()
+all_chats = list_chats()
 
-selected_chat = st.sidebar.selectbox("📁 Reprendre une discussion", chat_files)
-if selected_chat:
-    if st.sidebar.button("🔄 Charger"):
-        data = load_chat(selected_chat)
-        st.session_state.chat_history = data["messages"]
-        st.session_state.greeted = True
+# Regroupement par jour
+from collections import defaultdict
+from datetime import date
+
+chat_by_day = defaultdict(list)
+for chat in all_chats:
+    label = "Aujourd'hui" if chat["date"].date() == date.today() else chat["date"].strftime("%d %B %Y")
+    chat_by_day[label].append(chat)
+
+# Affichage dans la sidebar
+clicked_chat = None
+for group, items in chat_by_day.items():
+    st.sidebar.markdown(f"### {group}")
+    for chat in items:
+        if st.sidebar.button(chat["title"], key=chat["filename"]):
+            clicked_chat = chat
 
 if st.sidebar.button("🆕 Nouvelle discussion"):
     st.session_state.chat_history = []
     st.session_state.last_input = ""
     st.session_state.greeted = False
+    st.experimental_rerun()
+
+if clicked_chat:
+    data = load_chat(clicked_chat["filename"])
+    st.session_state.chat_history = data["messages"]
+    st.session_state.greeted = True
 
 # === Header fixe avec avatar et réseaux ===
 if bot_avatar:
@@ -107,7 +123,7 @@ if user_input and user_input.strip() and user_input != st.session_state.last_inp
     with st.chat_message("assistant", avatar=bot_avatar):
         st.markdown(response)
 
-# === Sauvegarde automatique après chaque échange ===
+# === Sauvegarde automatique ===
 if st.session_state.chat_history:
     title = st.session_state.chat_history[0]["content"][:30].replace(" ", "_").strip(".,")
     save_chat(title, st.session_state.chat_history)
@@ -120,7 +136,7 @@ st.markdown("""
 </p>
 """, unsafe_allow_html=True)
 
-# === Scroll auto intelligent + bouton flottant ===
+# === Scroll auto + bouton flottant ===
 st.markdown("""
 <style>
 .scroll-down-btn {
