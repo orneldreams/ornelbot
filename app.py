@@ -99,51 +99,42 @@ st.markdown("""
 
 # === Scroll auto + bouton "descendre" ===
 st.markdown("""
-<style>
-.scroll-down-btn {
-    position: fixed;
-    bottom: 90px;
-    right: 20px;
-    background-color: #4CAF50;
-    border: none;
-    color: white;
-    padding: 12px;
-    border-radius: 50%;
-    box-shadow: 0px 2px 6px rgba(0,0,0,0.3);
-    cursor: pointer;
-    z-index: 9999;
-    display: none;
-}
-</style>
-
 <button class="scroll-down-btn" id="scroll-down-btn" title="Voir les derniers messages">⬇️</button>
 
 <script>
 const scrollBtn = document.getElementById("scroll-down-btn");
-const chatContainer = document.querySelector('section.main');
+let container = null;
 
-const toggleScrollButton = () => {
-    if (!chatContainer) return;
-    const isAtBottom = chatContainer.scrollHeight - chatContainer.scrollTop <= chatContainer.clientHeight + 100;
+function findScrollable() {
+    const sections = document.querySelectorAll("section");
+    for (let sec of sections) {
+        if (sec.scrollHeight > sec.clientHeight + 50) return sec;
+    }
+    return null;
+}
+
+function scrollToBottom() {
+    container = findScrollable();
+    if (container) {
+        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+    }
+}
+
+function toggleScrollButton() {
+    container = findScrollable();
+    if (!container) return;
+    const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
     scrollBtn.style.display = isAtBottom ? "none" : "block";
-};
+}
 
-chatContainer?.addEventListener('scroll', toggleScrollButton);
-
-scrollBtn?.addEventListener('click', () => {
-    chatContainer?.scrollTo({
-        top: chatContainer.scrollHeight,
-        behavior: 'smooth'
-    });
-});
+scrollBtn.addEventListener("click", scrollToBottom);
 
 const observer = new MutationObserver(() => {
-    chatContainer?.scrollTo({
-        top: chatContainer.scrollHeight,
-        behavior: 'smooth'
-    });
+    scrollToBottom();
     toggleScrollButton();
 });
 observer.observe(document.body, { childList: true, subtree: true });
+
+window.addEventListener("scroll", toggleScrollButton);
 </script>
 """, unsafe_allow_html=True)
