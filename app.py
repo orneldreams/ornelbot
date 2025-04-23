@@ -39,66 +39,47 @@ st.markdown("""
 
 # === Avatar & titre ===
 avatar_path = "assets/avatar.png"
-if os.path.exists(avatar_path):
-    avatar_base64 = get_base64_image(avatar_path)
+avatar_base64 = get_base64_image(avatar_path) if os.path.exists(avatar_path) else ""
+if avatar_base64:
     st.markdown(f"""
         <div style='text-align: center; margin-bottom: 10px;'>
             <img src='data:image/png;base64,{avatar_base64}' width='100' style='border-radius: 50%;'/>
         </div>
     """, unsafe_allow_html=True)
 else:
-    avatar_base64 = ""
     st.warning("Avatar manquant.")
 
 st.markdown("<h1 style='text-align:center;'>OrnelBot</h1>", unsafe_allow_html=True)
 
-# === Message d’accueil ===
-if os.path.exists(avatar_path):
-    st.markdown(f"""
-    <div class="chat-container">
-        <img src="data:image/png;base64,{avatar_base64}" class="chat-avatar">
-        <div class="chat-bubble">
-            <p>Salut ! Je suis OrnelBot.<br>
-            Pose-moi n’importe quelle question, que ce soit sur mes projets, mes compétences ou des sujets plus généraux.</p>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# === État session ===
+# === Session state ===
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
+if "last_input" not in st.session_state:
+    st.session_state.last_input = ""
 
 # === Affichage historique ===
 for message in st.session_state.chat_history:
-    if message["role"] == "assistant":
-        st.markdown(f"""
-        <div class="chat-container">
-            <img src="data:image/png;base64,{avatar_base64}" class="chat-avatar">
-            <div class="chat-bubble">
-                <p>{message['content']}</p>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    elif message["role"] == "user":
-        st.markdown(f"""
-        <div class="chat-container user">
-            <div class="chat-bubble user-bubble">
-                <p>{message['content']}</p>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-# === Champ input avec bouton Envoyer ===
-with st.form(key="chat_form", clear_on_submit=True):
-    user_input = st.text_input("Tapez votre message...", key="user_input")
-    submitted = st.form_submit_button("Envoyer")
+# === Champ de saisie natif avec vérification ===
+user_input = st.chat_input("Tape ton message ici...")
 
-if submitted and user_input:
+if user_input and user_input.strip() and user_input != st.session_state.last_input:
+    user_input = user_input.strip()
+    st.session_state.chat_history.append({"role": "user", "content": user_input})
+
     prompt = build_prompt(profile, st.session_state.chat_history, user_input)
     response = generate_response(prompt)
 
-    st.session_state.chat_history.append({"role": "user", "content": user_input})
     st.session_state.chat_history.append({"role": "assistant", "content": response})
+    st.session_state.last_input = user_input
+
+    # Affichage immédiat
+    with st.chat_message("user"):
+        st.markdown(user_input)
+    with st.chat_message("assistant"):
+        st.markdown(response)
 
 # === Footer ===
 st.markdown("""
