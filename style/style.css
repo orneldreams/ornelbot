@@ -9,7 +9,41 @@ body {
 
 /* Corrige les marges de base */
 .block-container {
-    padding-bottom: 150px !important; /* Laisse de l'espace pour l'input natif */
+    padding-top: 140px !important;  /* Espace pour header fixe */
+    padding-bottom: 150px !important; /* Espace pour l'input en bas */
+}
+
+/* ======= Header fixe (avatar + titre + liens) ======= */
+.header-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: #0e0e12;
+    z-index: 1000;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #222;
+}
+
+.header-fixed img {
+    display: block;
+    margin: 0 auto 5px auto;
+    border-radius: 50%;
+    width: 80px;
+}
+
+.header-fixed h1 {
+    text-align: center;
+    color: #ffffff;
+    margin: 5px 0;
+    font-size: 1.8em;
+}
+
+.header-fixed .social-links {
+    position: absolute;
+    top: 15px;
+    right: 20px;
 }
 
 /* ======= Titre principal ======= */
