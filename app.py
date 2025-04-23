@@ -2,9 +2,11 @@ import streamlit as st
 import json
 import os
 import base64
+from datetime import datetime
 from PIL import Image
 from core.prompt_builder import build_prompt
 from core.groq_client import generate_response
+from core.chat_manager import list_chats, load_chat, save_chat
 
 # === Fonctions utilitaires ===
 def load_profile():
@@ -30,6 +32,22 @@ user_avatar_path = "assets/user_avatar.png"
 
 bot_avatar = f"data:image/png;base64,{get_base64_image(bot_avatar_path)}" if os.path.exists(bot_avatar_path) else None
 user_avatar = f"data:image/png;base64,{get_base64_image(user_avatar_path)}" if os.path.exists(user_avatar_path) else None
+
+# === Sidebar ===
+st.sidebar.header("💬 Discussions")
+chat_files = list_chats()
+
+selected_chat = st.sidebar.selectbox("📁 Reprendre une discussion", chat_files)
+if selected_chat:
+    if st.sidebar.button("🔄 Charger"):
+        data = load_chat(selected_chat)
+        st.session_state.chat_history = data["messages"]
+        st.session_state.greeted = True
+
+if st.sidebar.button("🆕 Nouvelle discussion"):
+    st.session_state.chat_history = []
+    st.session_state.last_input = ""
+    st.session_state.greeted = False
 
 # === Header fixe avec avatar et réseaux ===
 if bot_avatar:
@@ -88,6 +106,11 @@ if user_input and user_input.strip() and user_input != st.session_state.last_inp
         st.markdown(user_input)
     with st.chat_message("assistant", avatar=bot_avatar):
         st.markdown(response)
+
+# === Sauvegarde automatique après chaque échange ===
+if st.session_state.chat_history:
+    title = st.session_state.chat_history[0]["content"][:30].replace(" ", "_").strip(".,")
+    save_chat(title, st.session_state.chat_history)
 
 # === Footer ===
 st.markdown("""
