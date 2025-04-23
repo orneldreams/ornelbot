@@ -143,15 +143,11 @@ if user_input and user_input.strip() and user_input != st.session_state.last_inp
         filename = save_chat(title, st.session_state.chat_history)
         st.session_state.current_chat_filename = filename
         st.session_state.chat_saved = True
-    else:
+    elif st.session_state.current_chat_filename:
         path = os.path.join("chats", st.session_state.current_chat_filename)
         if os.path.exists(path):
-            with open(path, "r+", encoding="utf-8") as f:
-                data = json.load(f)
-                data["messages"] = st.session_state.chat_history
-                f.seek(0)
-                json.dump(data, f, ensure_ascii=False, indent=2)
-                f.truncate()
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump({"messages": st.session_state.chat_history}, f, ensure_ascii=False, indent=2)
 
 # === Footer ===
 st.markdown("""
