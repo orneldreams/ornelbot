@@ -2,7 +2,7 @@ import streamlit as st
 import json
 import os
 import base64
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from PIL import Image
 import re
 from core.prompt_builder import build_prompt
@@ -43,6 +43,17 @@ def clean_user_input(text):
     text = text.replace("cest", "C'est").replace("Cest", "C'est")
     return text
 
+def format_date_label(d):
+    today = date.today()
+    if d == today:
+        return "Aujourd’hui"
+    elif d == today - timedelta(days=1):
+        return "Hier"
+    elif d >= today - timedelta(days=7):
+        return "7 jours précédents"
+    else:
+        return d.strftime("%d %B %Y")
+
 def insert_date_separator():
     if "last_displayed_date" not in st.session_state:
         st.session_state.last_displayed_date = None
@@ -78,28 +89,37 @@ if "current_chat_filename" not in st.session_state:
     st.session_state.current_chat_filename = None
 
 # === Sidebar façon ChatGPT ===
-st.sidebar.header("\ud83d\udcac Discussions")
+st.sidebar.header("💬 Discussions")
 chat_files = list_chats()
 
+# Group chats by date
+grouped_chats = {}
 for chat in chat_files:
-    col1, col2, col3 = st.sidebar.columns([6, 2, 2], gap="small")
-    if col1.button(chat["title"], key=f"load_{chat['filename']}"):
-        data = load_chat(chat["filename"])
-        st.session_state.chat_history = data["messages"]
-        st.session_state.greeted = True
-        st.session_state.current_chat_filename = chat["filename"]
-    if col2.button("\u270f\ufe0f", key=f"rename_{chat['filename']}"):
-        new_title = st.text_input("Renommer la discussion :", key=f"new_title_{chat['filename']}")
-        if new_title:
-            new_filename = rename_chat(chat["filename"], new_title)
-            if new_filename:
-                st.session_state.current_chat_filename = new_filename
-                st.rerun()
-    if col3.button("\ud83d\uddd1\ufe0f", key=f"delete_{chat['filename']}"):
-        delete_chat(chat["filename"])
-        st.rerun()
+    date_obj = chat["date"].date() if isinstance(chat["date"], datetime) else date.today()
+    label = format_date_label(date_obj)
+    grouped_chats.setdefault(label, []).append(chat)
 
-if st.sidebar.button("\u2795 Nouvelle discussion"):
+for label in grouped_chats:
+    st.sidebar.markdown(f"**{label}**")
+    for chat in grouped_chats[label]:
+        col1, col2, col3 = st.sidebar.columns([6, 2, 2], gap="small")
+        if col1.button(chat["title"], key=f"load_{chat['filename']}"):
+            data = load_chat(chat["filename"])
+            st.session_state.chat_history = data["messages"]
+            st.session_state.greeted = True
+            st.session_state.current_chat_filename = chat["filename"]
+        if col2.button("✏️", key=f"rename_{chat['filename']}"):
+            new_title = st.text_input("Renommer la discussion :", key=f"new_title_{chat['filename']}")
+            if new_title:
+                new_filename = rename_chat(chat["filename"], new_title)
+                if new_filename:
+                    st.session_state.current_chat_filename = new_filename
+                    st.rerun()
+        if col3.button("🗑️", key=f"delete_{chat['filename']}"):
+            delete_chat(chat["filename"])
+            st.rerun()
+
+if st.sidebar.button("➕ Nouvelle discussion"):
     st.session_state.chat_history = []
     st.session_state.last_input = ""
     st.session_state.greeted = False
