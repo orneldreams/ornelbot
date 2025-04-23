@@ -97,13 +97,36 @@ st.markdown("""
 </p>
 """, unsafe_allow_html=True)
 
-# === Scroll auto + bouton "descendre" ===
+# === Scroll auto intelligent + bouton flottant ===
 st.markdown("""
+<style>
+.scroll-down-btn {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 12px;
+    border-radius: 50%;
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.3);
+    cursor: pointer;
+    z-index: 9999;
+    display: none;
+    transition: transform 0.2s ease-in-out;
+}
+.scroll-down-btn:hover {
+    background-color: #388e3c;
+    transform: scale(1.1);
+}
+</style>
+
 <button class="scroll-down-btn" id="scroll-down-btn" title="Voir les derniers messages">⬇️</button>
 
 <script>
-const scrollBtn = document.getElementById("scroll-down-btn");
 let container = null;
+const scrollBtn = document.getElementById("scroll-down-btn");
+let userAtBottom = true;
 
 function findScrollable() {
     const sections = document.querySelectorAll("section");
@@ -125,12 +148,14 @@ function toggleScrollButton() {
     if (!container) return;
     const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
     scrollBtn.style.display = isAtBottom ? "none" : "block";
+    userAtBottom = isAtBottom;
 }
 
 scrollBtn.addEventListener("click", scrollToBottom);
 
 const observer = new MutationObserver(() => {
-    scrollToBottom();
+    container = findScrollable();
+    if (userAtBottom) scrollToBottom();
     toggleScrollButton();
 });
 observer.observe(document.body, { childList: true, subtree: true });
