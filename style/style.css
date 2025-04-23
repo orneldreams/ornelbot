@@ -9,7 +9,7 @@ body {
 
 /* Corrige les marges de base */
 .block-container {
-    padding-top: 140px !important;  /* Espace pour header fixe */
+    padding-top: 160px !important;  /* Espace pour header fixe */
     padding-bottom: 150px !important; /* Espace pour l'input en bas */
 }
 
@@ -46,7 +46,7 @@ body {
     right: 20px;
 }
 
-/* ======= Titre principal ======= */
+/* ======= Titre principal (fallback) ======= */
 h1 {
     color: #ffffff;
     text-align: center;

@@ -36,7 +36,7 @@ user_avatar = f"data:image/png;base64,{get_base64_image(user_avatar_path)}" if o
 if bot_avatar:
     st.markdown(f"""
     <div class="header-fixed">
-        <img src="{bot_avatar}" width="80" style="border-radius: 50%;" />
+        <img src="{bot_avatar}" />
         <h1>OrnelBot</h1>
         <div class="social-links">
             <a href="https://github.com/tititaya" target="_blank" style="margin-right: 10px;">
@@ -47,7 +47,8 @@ if bot_avatar:
             </a>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
+
 else:
     st.warning("Avatar du bot manquant.")
 
