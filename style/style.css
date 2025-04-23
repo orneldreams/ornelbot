@@ -5,25 +5,27 @@ body {
     font-family: 'Segoe UI', sans-serif;
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
 }
 
-/* Corrige les marges de base */
+/* Corrige le padding pour laisser place au header fixé */
 .block-container {
-    padding-top: 160px !important;  /* Espace pour header fixe */
-    padding-bottom: 150px !important; /* Espace pour l'input en bas */
+    padding-top: 160px !important;
+    padding-bottom: 150px !important;
 }
 
-/* ======= Header fixe (avatar + titre + liens) ======= */
+/* ======= Header fixé ======= */
 .header-fixed {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     background-color: #0e0e12;
-    z-index: 1000;
+    z-index: 9999;
     padding-top: 10px;
     padding-bottom: 10px;
     border-bottom: 1px solid #222;
+    text-align: center;
 }
 
 .header-fixed img {
@@ -34,7 +36,6 @@ body {
 }
 
 .header-fixed h1 {
-    text-align: center;
     color: #ffffff;
     margin: 5px 0;
     font-size: 1.8em;
@@ -44,15 +45,6 @@ body {
     position: absolute;
     top: 15px;
     right: 20px;
-}
-
-/* ======= Titre principal (fallback) ======= */
-h1 {
-    color: #ffffff;
-    text-align: center;
-    font-size: 2.5em;
-    margin-top: 0.2em;
-    margin-bottom: 0.5em;
 }
 
 /* ======= Conteneur de chat ======= */
@@ -122,14 +114,14 @@ input[type="text"] {
     font-size: 1rem !important;
 }
 
-/* ======= Liens réseaux ======= */
+/* Liens réseaux */
 a img:hover {
     filter: brightness(1.3);
     transform: scale(1.1);
     transition: 0.3s ease;
 }
 
-/* ======= Footer animé ======= */
+/* Footer animé */
 .footer-fade {
     transition: opacity 0.5s ease-in-out;
 }
