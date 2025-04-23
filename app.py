@@ -4,6 +4,7 @@ import os
 import base64
 from datetime import datetime
 from PIL import Image
+import re
 from core.prompt_builder import build_prompt
 from core.groq_client import generate_response
 from core.chat_manager import list_chats, load_chat, save_chat, delete_chat, rename_chat
@@ -29,7 +30,18 @@ def get_first_user_message(chat_history):
 
 def extract_keywords_for_title(text):
     words = text.replace("\n", " ").strip().split()
-    return " ".join(words[:5]) if words else "Nouvelle discussion"
+    return "_".join(words[:6]) if words else "Discussion"
+
+def clean_user_input(text):
+    text = text.strip()
+    text = re.sub(r"\s+", " ", text)
+    if not text:
+        return text
+    if not text.endswith(('.', '!', '?')):
+        text += '.'
+    text = text[0].upper() + text[1:]
+    text = text.replace("cest", "C'est").replace("Cest", "C'est")
+    return text
 
 # === Initialisation ===
 st.set_page_config(page_title="OrnelBot", page_icon="🤖", layout="centered")
@@ -115,17 +127,17 @@ for message in st.session_state.chat_history:
 user_input = st.chat_input("Tape ton message ici...")
 
 if user_input and user_input.strip() and user_input != st.session_state.last_input:
-    user_input = user_input.strip()
-    st.session_state.chat_history.append({"role": "user", "content": user_input})
+    cleaned_input = clean_user_input(user_input)
+    st.session_state.chat_history.append({"role": "user", "content": cleaned_input})
 
-    prompt = build_prompt(profile, st.session_state.chat_history, user_input)
+    prompt = build_prompt(profile, st.session_state.chat_history, cleaned_input)
     response = generate_response(prompt)
 
     st.session_state.chat_history.append({"role": "assistant", "content": response})
     st.session_state.last_input = user_input
 
     with st.chat_message("user", avatar=user_avatar):
-        st.markdown(user_input)
+        st.markdown(cleaned_input)
     with st.chat_message("assistant", avatar=bot_avatar):
         st.markdown(response)
 
@@ -144,29 +156,18 @@ if st.session_state.chat_history:
         first_msg = get_first_user_message(st.session_state.chat_history)
         title = extract_keywords_for_title(first_msg)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{timestamp}_{title.replace(' ', '_')}.json"
+        filename = f"{timestamp}_{title}.json"
         save_chat(title, st.session_state.chat_history)
         st.session_state.current_chat_filename = filename
 
-# === Footer fixé en bas ===
+# === Footer ===
 st.markdown("""
-<style>
-.footer-fixed {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: #0e1117;
-    padding: 10px 0;
-    text-align: center;
-    color: #888;
-    font-size: 0.85em;
-    z-index: 10000;
-}
-</style>
-<div class="footer-fixed">
+<footer style='position: fixed; bottom: 0; width: 100%; background: transparent; text-align: center;'>
+<hr style='margin-top: 10px;' />
+<p style='color: #888888; font-size: 0.85em;'>
     ©2025 OrnelBot – On est ce qu’on veut.
-</div>
+</p>
+</footer>
 """, unsafe_allow_html=True)
 
 # === Scroll auto intelligent + bouton flottant ===
