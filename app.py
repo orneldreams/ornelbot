@@ -79,8 +79,10 @@ for chat in chat_files:
     if col2.button("✏️", key=f"rename_{chat['filename']}"):
         new_title = st.text_input("Renommer la discussion :", key=f"new_title_{chat['filename']}")
         if new_title:
-            rename_chat(chat["filename"], new_title)
-            st.rerun()
+            new_filename = rename_chat(chat["filename"], new_title)
+            if new_filename:
+                st.session_state.current_chat_filename = new_filename
+                st.rerun()
     if col3.button("🗑️", key=f"delete_{chat['filename']}"):
         delete_chat(chat["filename"])
         st.rerun()
@@ -155,9 +157,7 @@ if st.session_state.chat_history:
     else:
         first_msg = get_first_user_message(st.session_state.chat_history)
         title = extract_keywords_for_title(first_msg)
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{timestamp}_{title}.json"
-        save_chat(title, st.session_state.chat_history)
+        filename = save_chat(title, st.session_state.chat_history)
         st.session_state.current_chat_filename = filename
 
 # === Footer ===
