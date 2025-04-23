@@ -68,10 +68,10 @@ for chat in chat_files:
         new_title = st.text_input("Renommer la discussion :", key=f"new_title_{chat['filename']}")
         if new_title:
             rename_chat(chat["filename"], new_title)
-            st.experimental_rerun()
+            st.rerun()
     if col3.button("🗑️", key=f"delete_{chat['filename']}"):
         delete_chat(chat["filename"])
-        st.experimental_rerun()
+        st.rerun()
 
 if st.sidebar.button("➕ Nouvelle discussion"):
     st.session_state.chat_history = []
