@@ -2,9 +2,8 @@ import streamlit as st
 import json
 import os
 import base64
-from datetime import datetime, date, timedelta
+from datetime import datetime
 from PIL import Image
-import re
 from core.prompt_builder import build_prompt
 from core.groq_client import generate_response
 from core.chat_manager import list_chats, load_chat, save_chat, delete_chat, rename_chat
@@ -21,50 +20,6 @@ def inject_css():
 def get_base64_image(image_path):
     with open(image_path, "rb") as f:
         return base64.b64encode(f.read()).decode()
-
-def get_first_user_message(chat_history):
-    for msg in chat_history:
-        if msg["role"] == "user":
-            return msg["content"]
-    return "Nouvelle discussion"
-
-def extract_keywords_for_title(text):
-    words = text.replace("\n", " ").strip().split()
-    return "_".join(words[:6]) if words else "Discussion"
-
-def clean_user_input(text):
-    text = text.strip()
-    text = re.sub(r"\s+", " ", text)
-    if not text:
-        return text
-    if not text.endswith(('.', '!', '?')):
-        text += '.'
-    text = text[0].upper() + text[1:]
-    text = text.replace("cest", "C'est").replace("Cest", "C'est")
-    return text
-
-def format_date_label(d):
-    today = date.today()
-    if d == today:
-        return "Aujourd’hui"
-    elif d == today - timedelta(days=1):
-        return "Hier"
-    elif d >= today - timedelta(days=7):
-        return "7 jours précédents"
-    else:
-        return d.strftime("%d %B %Y")
-
-def insert_date_separator():
-    if "last_displayed_date" not in st.session_state:
-        st.session_state.last_displayed_date = None
-    today = date.today()
-    if st.session_state.last_displayed_date != today:
-        st.session_state.last_displayed_date = today
-        st.markdown(f"""
-        <div style='text-align: center; color: gray; margin: 1em 0;'>
-            🗓️ Aujourd'hui – {today.strftime('%d/%m/%Y')}
-        </div>
-        """, unsafe_allow_html=True)
 
 # === Initialisation ===
 st.set_page_config(page_title="OrnelBot", page_icon="🤖", layout="centered")
@@ -92,32 +47,21 @@ if "current_chat_filename" not in st.session_state:
 st.sidebar.header("💬 Discussions")
 chat_files = list_chats()
 
-# Group chats by date
-grouped_chats = {}
 for chat in chat_files:
-    date_obj = chat["date"].date() if isinstance(chat["date"], datetime) else date.today()
-    label = format_date_label(date_obj)
-    grouped_chats.setdefault(label, []).append(chat)
-
-for label in grouped_chats:
-    st.sidebar.markdown(f"**{label}**")
-    for chat in grouped_chats[label]:
-        col1, col2, col3 = st.sidebar.columns([6, 2, 2], gap="small")
-        if col1.button(chat["title"], key=f"load_{chat['filename']}"):
-            data = load_chat(chat["filename"])
-            st.session_state.chat_history = data["messages"]
-            st.session_state.greeted = True
-            st.session_state.current_chat_filename = chat["filename"]
-        if col2.button("✏️", key=f"rename_{chat['filename']}"):
-            new_title = st.text_input("Renommer la discussion :", key=f"new_title_{chat['filename']}")
-            if new_title:
-                new_filename = rename_chat(chat["filename"], new_title)
-                if new_filename:
-                    st.session_state.current_chat_filename = new_filename
-                    st.rerun()
-        if col3.button("🗑️", key=f"delete_{chat['filename']}"):
-            delete_chat(chat["filename"])
-            st.rerun()
+    col1, col2, col3 = st.sidebar.columns([6, 2, 2], gap="small")
+    if col1.button(chat["title"], key=f"load_{chat['filename']}"):
+        data = load_chat(chat["filename"])
+        st.session_state.chat_history = data["messages"]
+        st.session_state.greeted = True
+        st.session_state.current_chat_filename = chat["filename"]
+    if col2.button("✏️", key=f"rename_{chat['filename']}"):
+        new_title = st.text_input("Renommer la discussion :", key=f"new_title_{chat['filename']}")
+        if new_title:
+            rename_chat(chat["filename"], new_title)
+            st.experimental_rerun()
+    if col3.button("🗑️", key=f"delete_{chat['filename']}"):
+        delete_chat(chat["filename"])
+        st.experimental_rerun()
 
 if st.sidebar.button("➕ Nouvelle discussion"):
     st.session_state.chat_history = []
@@ -151,8 +95,7 @@ if not st.session_state.greeted and bot_avatar:
     st.session_state.chat_history.append({"role": "assistant", "content": welcome_message})
     st.session_state.greeted = True
 
-# === Affichage historique avec date ===
-insert_date_separator()
+# === Affichage historique ===
 for message in st.session_state.chat_history:
     avatar = bot_avatar if message["role"] == "assistant" else user_avatar
     with st.chat_message(message["role"], avatar=avatar):
@@ -162,46 +105,44 @@ for message in st.session_state.chat_history:
 user_input = st.chat_input("Tape ton message ici...")
 
 if user_input and user_input.strip() and user_input != st.session_state.last_input:
-    cleaned_input = clean_user_input(user_input)
-    st.session_state.chat_history.append({"role": "user", "content": cleaned_input})
+    user_input = user_input.strip()
+    st.session_state.chat_history.append({"role": "user", "content": user_input})
 
-    prompt = build_prompt(profile, st.session_state.chat_history, cleaned_input)
+    prompt = build_prompt(profile, st.session_state.chat_history, user_input)
     response = generate_response(prompt)
 
     st.session_state.chat_history.append({"role": "assistant", "content": response})
     st.session_state.last_input = user_input
 
     with st.chat_message("user", avatar=user_avatar):
-        st.markdown(cleaned_input)
+        st.markdown(user_input)
     with st.chat_message("assistant", avatar=bot_avatar):
         st.markdown(response)
 
-# === Sauvegarde si une discussion a été chargée ===
-if st.session_state.chat_history and st.session_state.current_chat_filename:
-    path = os.path.join("chats", st.session_state.current_chat_filename)
-    if os.path.exists(path):
-        with open(path, "r+", encoding="utf-8") as f:
-            data = json.load(f)
-            data["messages"] = st.session_state.chat_history
-            f.seek(0)
-            json.dump(data, f, ensure_ascii=False, indent=2)
-            f.truncate()
-
-# === Sauvegarde si aucune discussion n'a encore été créée ===
-if st.session_state.chat_history and not st.session_state.current_chat_filename:
-    first_msg = get_first_user_message(st.session_state.chat_history)
-    title = extract_keywords_for_title(first_msg)
-    filename = save_chat(title, st.session_state.chat_history)
-    st.session_state.current_chat_filename = filename
+# === Sauvegarde automatique après chaque échange ===
+if st.session_state.chat_history:
+    if st.session_state.current_chat_filename:
+        path = os.path.join("chats", st.session_state.current_chat_filename)
+        if os.path.exists(path):
+            with open(path, "r+", encoding="utf-8") as f:
+                data = json.load(f)
+                data["messages"] = st.session_state.chat_history
+                f.seek(0)
+                json.dump(data, f, ensure_ascii=False, indent=2)
+                f.truncate()
+    else:
+        title = st.session_state.chat_history[0]["content"][:30].replace(" ", "_").strip(".,")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{timestamp}_{title}.json"
+        save_chat(title, st.session_state.chat_history)
+        st.session_state.current_chat_filename = filename
 
 # === Footer ===
 st.markdown("""
-<footer style='position: fixed; bottom: 0; width: 100%; background: transparent; text-align: center;'>
-<hr style='margin-top: 10px;' />
-<p style='color: #888888; font-size: 0.85em;'>
+<hr style='margin-top: 50px;' />
+<p style='text-align: center; color: #888888; font-size: 0.85em;'>
     ©2025 OrnelBot – On est ce qu’on veut.
 </p>
-</footer>
 """, unsafe_allow_html=True)
 
 # === Scroll auto intelligent + bouton flottant ===
@@ -270,7 +211,3 @@ observer.observe(document.body, { childList: true, subtree: true });
 window.addEventListener("scroll", toggleScrollButton);
 </script>
 """, unsafe_allow_html=True)
-
-
-
-
