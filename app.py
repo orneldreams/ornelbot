@@ -25,17 +25,9 @@ st.set_page_config(page_title="OrnelBot", page_icon="🤖", layout="centered")
 inject_css()
 profile = load_profile()
 
-# === Avatar ===
-avatar_path = "assets/avatar.png"
-if os.path.exists(avatar_path):
-    avatar_base64 = get_base64_image(avatar_path)
-else:
-    avatar_base64 = ""
-    st.warning("Avatar manquant.")
-
-# === Liens GitHub & LinkedIn (fonctionnels et visibles en haut à droite) ===
+# === Liens GitHub & LinkedIn ===
 st.markdown("""
-<div style='position: absolute; top: 15px; right: 20px; z-index: 100;'>
+<div style='position: absolute; top: 15px; right: 20px;'>
     <a href="https://github.com/tititaya" target="_blank" style="margin-right: 10px;">
         <img src="https://img.icons8.com/ios-glyphs/30/ffffff/github.png"/>
     </a>
@@ -45,54 +37,49 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# === Titre centré ===
+# === Avatar & titre ===
+avatar_path = "assets/avatar.png"
+avatar_base64 = get_base64_image(avatar_path) if os.path.exists(avatar_path) else ""
+if avatar_base64:
+    st.markdown(f"""
+        <div style='text-align: center; margin-bottom: 10px;'>
+            <img src='data:image/png;base64,{avatar_base64}' width='100' style='border-radius: 50%;'/>
+        </div>
+    """, unsafe_allow_html=True)
+else:
+    st.warning("Avatar manquant.")
+
 st.markdown("<h1 style='text-align:center;'>OrnelBot</h1>", unsafe_allow_html=True)
 
-# === État session ===
+# === Session state ===
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
-
-if "greeted" not in st.session_state:
-    st.session_state.greeted = False
-
-# === Message d’accueil (une seule fois) ===
-if not st.session_state.greeted and avatar_base64:
-    st.session_state.chat_history.append({
-        "role": "assistant",
-        "content": "Salut ! Je suis OrnelBot. Pose-moi n’importe quelle question, que ce soit sur mes projets, mes compétences ou des sujets plus généraux."
-    })
-    st.session_state.greeted = True
+if "last_input" not in st.session_state:
+    st.session_state.last_input = ""
 
 # === Affichage historique ===
 for message in st.session_state.chat_history:
-    if message["role"] == "assistant":
-        st.markdown(f"""
-        <div class="chat-container">
-            <img src="data:image/png;base64,{avatar_base64}" class="chat-avatar">
-            <div class="chat-bubble">
-                <p>{message['content']}</p>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    elif message["role"] == "user":
-        st.markdown(f"""
-        <div class="chat-container user">
-            <div class="chat-bubble user-bubble">
-                <p>{message['content']}</p>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-# === Entrée utilisateur avec chat_input ===
-raw_input = st.chat_input("Tapez votre message ici...")
+# === Champ de saisie natif avec vérification ===
+user_input = st.chat_input("Tape ton message ici...")
 
-if raw_input is not None and raw_input.strip():
-    user_input = raw_input.strip()
+if user_input and user_input.strip() and user_input != st.session_state.last_input:
+    user_input = user_input.strip()
+    st.session_state.chat_history.append({"role": "user", "content": user_input})
+
     prompt = build_prompt(profile, st.session_state.chat_history, user_input)
     response = generate_response(prompt)
 
-    st.session_state.chat_history.append({"role": "user", "content": user_input})
     st.session_state.chat_history.append({"role": "assistant", "content": response})
+    st.session_state.last_input = user_input
+
+    # Affichage immédiat
+    with st.chat_message("user"):
+        st.markdown(user_input)
+    with st.chat_message("assistant"):
+        st.markdown(response)
 
 # === Footer ===
 st.markdown("""
@@ -101,3 +88,5 @@ st.markdown("""
     ©2025 OrnelBot – On est ce qu’on veut.
 </p>
 """, unsafe_allow_html=True)
+
+
