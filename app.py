@@ -27,7 +27,7 @@ profile = load_profile()
 
 # === Liens GitHub & LinkedIn ===
 st.markdown("""
-<div style='position: absolute; top: 15px; right: 20px;'>
+<div style='position: absolute; top: 15px; right: 20px; z-index: 100;'>
     <a href="https://github.com/tititaya" target="_blank" style="margin-right: 10px;">
         <img src="https://img.icons8.com/ios-glyphs/30/ffffff/github.png"/>
     </a>
@@ -56,6 +56,14 @@ if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 if "last_input" not in st.session_state:
     st.session_state.last_input = ""
+if "greeted" not in st.session_state:
+    st.session_state.greeted = False
+
+# === Message d'accueil une seule fois ===
+if not st.session_state.greeted and avatar_base64:
+    welcome_message = "Salut ! Je suis OrnelBot. Pose-moi n'importe quelle question sur mes projets, mes compétences ou des sujets généraux."
+    st.session_state.chat_history.append({"role": "assistant", "content": welcome_message})
+    st.session_state.greeted = True
 
 # === Affichage historique ===
 for message in st.session_state.chat_history:
@@ -75,7 +83,6 @@ if user_input and user_input.strip() and user_input != st.session_state.last_inp
     st.session_state.chat_history.append({"role": "assistant", "content": response})
     st.session_state.last_input = user_input
 
-    # Affichage immédiat
     with st.chat_message("user"):
         st.markdown(user_input)
     with st.chat_message("assistant"):
@@ -88,5 +95,3 @@ st.markdown("""
     ©2025 OrnelBot – On est ce qu’on veut.
 </p>
 """, unsafe_allow_html=True)
-
-
