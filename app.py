@@ -29,7 +29,7 @@ def get_first_user_message(chat_history):
 
 def extract_keywords_for_title(text):
     words = text.replace("\n", " ").strip().split()
-    return "_".join(words[:6]) if words else "Discussion"
+    return " ".join(words[:5]) if words else "Nouvelle discussion"
 
 # === Initialisation ===
 st.set_page_config(page_title="OrnelBot", page_icon="🤖", layout="centered")
@@ -144,16 +144,29 @@ if st.session_state.chat_history:
         first_msg = get_first_user_message(st.session_state.chat_history)
         title = extract_keywords_for_title(first_msg)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{timestamp}_{title}.json"
+        filename = f"{timestamp}_{title.replace(' ', '_')}.json"
         save_chat(title, st.session_state.chat_history)
         st.session_state.current_chat_filename = filename
 
-# === Footer ===
+# === Footer fixé en bas ===
 st.markdown("""
-<hr style='margin-top: 50px;' />
-<p style='text-align: center; color: #888888; font-size: 0.85em;'>
+<style>
+.footer-fixed {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #0e1117;
+    padding: 10px 0;
+    text-align: center;
+    color: #888;
+    font-size: 0.85em;
+    z-index: 10000;
+}
+</style>
+<div class="footer-fixed">
     ©2025 OrnelBot – On est ce qu’on veut.
-</p>
+</div>
 """, unsafe_allow_html=True)
 
 # === Scroll auto intelligent + bouton flottant ===
