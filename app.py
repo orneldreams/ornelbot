@@ -187,6 +187,13 @@ if st.session_state.chat_history and st.session_state.current_chat_filename:
             json.dump(data, f, ensure_ascii=False, indent=2)
             f.truncate()
 
+# === Sauvegarde si aucune discussion n'a encore été créée ===
+if st.session_state.chat_history and not st.session_state.current_chat_filename:
+    first_msg = get_first_user_message(st.session_state.chat_history)
+    title = extract_keywords_for_title(first_msg)
+    filename = save_chat(title, st.session_state.chat_history)
+    st.session_state.current_chat_filename = filename
+
 # === Footer ===
 st.markdown("""
 <footer style='position: fixed; bottom: 0; width: 100%; background: transparent; text-align: center;'>
