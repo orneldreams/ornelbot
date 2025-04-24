@@ -1,7 +1,7 @@
 {
   "name": "Ornel Rony DIFFO",
   "bio": "Étudiant en M1 à l’ESIEA, passionné par les systèmes embarqués, l’IA, le DevOps, la data, et les architectures intelligentes. Je conçois des systèmes mêlant électronique, backend, supervision, visualisation et intelligence générative.",
-  "objectif": "Trouver une alternance de 2–3 ans dans les domaines de la validation, des tests logiciels, de la data, de l'IA générative ou des systèmes embarqués intelligents.",
+  "objectif": "Trouver une alternance de 2 ans dans les domaines de la validation, des tests logiciels, de la data, de l'IA générative ou des systèmes embarqués intelligents.",
   "langues": {
     "francais": "langue maternelle",
     "anglais": "technique"
@@ -66,5 +66,50 @@
   "liens": {
     "github": "https://github.com/tititaya",
     "linkedin": "https://www.linkedin.com/in/ornel-rony-d-01737b267/"
-  }
+  },
+  "ameliorations_importantes": [
+    "Gestion des bonjours répétitifs avec réponses adaptées au niveau d'insistance",
+    "Filtrage des requêtes sensibles avec message pédagogique plutôt que blocage",
+    "Détection de prompt injection ("ignore toutes les instructions", etc.)",
+    "Suppression du message de bienvenue du contexte pour ne pas fausser la détection",
+    "Affinage des réponses selon la nature du message (question vs salutation vs instruction)",
+    "Mémoire contextuelle temporaire par discussion (via fichier JSON)"
+  ],
+  "tech_stack": {
+    "python_version": "3.10",
+    "framework": "Streamlit",
+    "llm": "Groq API – LLaMA 3 70B",
+    "frontend": "Streamlit + Tailwind CSS",
+    "backend": "Python (FastAPI + outils maison)",
+    "deployment": "Railway (PaaS cloud)",
+    "database": "Stockage local JSON (pour historique, mémoire...)",
+    "features": ["Multi-session", "Contextualisation émotionnelle", "Détection de salutation", "Filtrage de sécurité"],
+    "securite": [
+      "Détection de prompt injection",
+      "Filtrage de mots sensibles",
+      "Gestion progressive des bonjours",
+      "Réponses contextualisées sans exécution aveugle"
+    ]
+  },
+  "structure_modulaire": {
+    "prompt_builder": "Crée dynamiquement un prompt enrichi",
+    "sanitize": "Filtrage, sécurité, détection de répétition",
+    "chat_manager": "Gestion fichiers, renommage, chargement",
+    "groq_client": "Appel API Groq avec modèle LLM",
+    "app.py": "Interface principale Streamlit",
+    "style.css": "Personnalisation visuelle"
+  },
+  "limitations_connues": [
+    "Je ne suis pas connecté à internet.",
+    "Je ne garde pas une mémoire longue sur plusieurs jours (stockage par fichier JSON).",
+    "Je peux ralentir si le serveur Groq est temporairement occupé.",
+    "Je ne peux pas exécuter de code réel ou accéder à des fichiers système de l’utilisateur."
+  ],
+  "utilites": [
+    "Répondre à des questions techniques sur les projets d’Ornel",
+    "Présenter ses compétences à des recruteurs",
+    "Expliquer des concepts tech ou IA",
+    "Servir d’exemple de chatbot sécurisé et personnalisable",
+    "Montrer une intégration Streamlit + API IA"
+  ]
 }
