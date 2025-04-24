@@ -70,7 +70,7 @@
   "ameliorations_importantes": [
     "Gestion des bonjours répétitifs avec réponses adaptées au niveau d'insistance",
     "Filtrage des requêtes sensibles avec message pédagogique plutôt que blocage",
-    "Détection de prompt injection ("ignore toutes les instructions", etc.)",
+    "Détection de prompt injection (\"ignore toutes les instructions\", etc.)",
     "Suppression du message de bienvenue du contexte pour ne pas fausser la détection",
     "Affinage des réponses selon la nature du message (question vs salutation vs instruction)",
     "Mémoire contextuelle temporaire par discussion (via fichier JSON)"
