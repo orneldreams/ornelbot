@@ -9,7 +9,7 @@ import re
 from core.prompt_builder import build_prompt
 from core.groq_client import generate_response
 from core.chat_manager import list_chats, load_chat, save_chat, delete_chat, rename_chat
-from utils.sanitize import check_security_level, is_repeated_greeting, sanitize_input_for_prompt
+from utils.sanitize import is_dangerous_input, is_repeated_greeting, sanitize_input_for_prompt
 
 # === Fonctions utilitaires ===
 def load_profile():
@@ -34,18 +34,6 @@ def clean_user_input(text):
     text = text[0].upper() + text[1:]
     text = text.replace("cest", "C'est").replace("Cest", "C'est")
     return text
-
-def handle_greeting_level(chat_history):
-    greetings = {"bonjour", "salut", "yo", "hello", "hi", "coucou", "rebonjour"}
-    count = sum(1 for msg in chat_history[-10:] if msg["role"] == "user" and msg["content"].lower().strip() in greetings)
-    if count == 1:
-        return "Salut 👋 Je suis prêt ! Tu veux parler d’un projet, d’un bug ou juste discuter ? 😄"
-    elif count == 2:
-        return "Re bonjour 😄 On s’est déjà salués, mais toujours là pour toi !"
-    elif count == 3:
-        return "Haha, on entre dans une boucle de bonjours là 😅 Tu veux me parler d’un truc en particulier ?"
-    else:
-        return "Toujours chaud pour te parler, mais changeons de disque 😎 Tu veux que je t’aide sur un sujet précis ?"
 
 # === Initialisation ===
 st.set_page_config(page_title="OrnelBot", page_icon="🤖", layout="centered")
@@ -139,47 +127,22 @@ for message in st.session_state.chat_history:
 user_input = st.chat_input("Tape ton message ici...")
 
 if user_input and user_input.strip() and user_input != st.session_state.last_input:
-    level = check_security_level(user_input)
 
-    if level == "blocked":
-        msg = "🚫 Ce type de message est bloqué pour des raisons de sécurité. Pose-moi plutôt une question sur un projet, une techno, ou un sujet sympa !"
-        st.session_state.chat_history.append({"role": "user", "content": user_input})
-        st.session_state.chat_history.append({"role": "assistant", "content": msg})
-        st.session_state.last_input = user_input
-        with st.chat_message("user", avatar=user_avatar):
-            st.markdown(user_input)
-        with st.chat_message("assistant", avatar=bot_avatar):
-            st.markdown(msg)
-        st.stop()
-
-    elif level == "suspicious":
-        msg = "⚠️ Je préfère éviter de répondre à cette demande. Parlons plutôt d’un sujet tech, de projets ou même de muscu 😄"
-        st.session_state.chat_history.append({"role": "user", "content": user_input})
-        st.session_state.chat_history.append({"role": "assistant", "content": msg})
-        st.session_state.last_input = user_input
-        with st.chat_message("user", avatar=user_avatar):
-            st.markdown(user_input)
-        with st.chat_message("assistant", avatar=bot_avatar):
-            st.markdown(msg)
+    if is_dangerous_input(user_input):
+        st.error("🚫 Ce message a été bloqué pour des raisons de sécurité.")
         st.stop()
 
     if is_repeated_greeting(user_input, st.session_state.chat_history):
-        greeting_msg = handle_greeting_level(st.session_state.chat_history)
-        st.session_state.chat_history.append({"role": "user", "content": user_input})
-        st.session_state.chat_history.append({"role": "assistant", "content": greeting_msg})
-        st.session_state.last_input = user_input
-        with st.chat_message("user", avatar=user_avatar):
-            st.markdown(user_input)
-        with st.chat_message("assistant", avatar=bot_avatar):
-            st.markdown(greeting_msg)
+        st.info("👋 Tu m'as déjà salué. Allons droit au but !")
         st.stop()
 
     cleaned_input = clean_user_input(user_input)
     safe_input = sanitize_input_for_prompt(cleaned_input)
+
     st.session_state.chat_history.append({"role": "user", "content": safe_input})
 
-    system_context = build_prompt(profile, st.session_state.chat_history, safe_input)
-    response = generate_response(system_context)
+    system_context, user_conversation = build_prompt(profile, st.session_state.chat_history, safe_input)
+    response = generate_response(system_context, user_conversation)
 
     st.session_state.chat_history.append({"role": "assistant", "content": response})
     st.session_state.last_input = user_input
