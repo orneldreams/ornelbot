@@ -1,31 +1,44 @@
 import re
 
-# Motifs suspects ou dangereux connus
-DANGEROUS_PATTERNS = [
-    "ignore all previous instructions", "ignore toutes les instructions",
-    "bypass", "system override", "jailbreak", "prompt injection", "simulate",
-    "act as", "you are now", "run command", "réinitialise", "supprime le contexte",
-    "explosion", "shutdown", "hping", "attaque", "root access", "transcende", "efface tout"
+# === Motifs classés par dangerosité ===
+BLOCK_PATTERNS = [
+    r"hping", r"attaque ddos", r"shutdown", r"root access",
+    r"ignore (toutes|all) les instructions",
+    r"supprime le contexte", r"efface tout", r"jailbreak"
 ]
 
-# Liste des mots de salutation simples
+SUSPICIOUS_PATTERNS = [
+    r"assistant libre", r"assistant\s+libre", r"asistant libre", r"asistnt libr",
+    r"sans restriction", r"sans\s+restrictions?", r"san restriction",
+    r"réponds sans filtre", r"reponds sans filtre", r"répond sans filtre",
+    r"tu n(’|')as pas de limites", r"tu n as pas de limites", r"pas de limites",
+    r"simulate.*hacker", r"you are now", r"you are\s+now",
+    r"désactive.*modération", r"desactive.*moderation", r"tu es désormais libre"
+]
+
 REPEATED_GREETINGS = {
-    "bonjour", "salut", "yo", "hello", "hi", "coucou", "re", "rebonjour"
+    "bonjour", "salut", "yo", "hello", "hi", "coucou", "rebonjour"
 }
 
 
-def is_dangerous_input(user_input: str) -> bool:
+def check_security_level(user_input: str) -> str:
     """
-    Détecte si un message utilisateur contient des instructions sensibles ou potentiellement dangereuses.
+    Analyse le message utilisateur et retourne :
+    - "blocked" si critique
+    - "suspicious" si suspect
+    - "safe" sinon
     """
     lower_input = user_input.lower()
-    return any(pattern in lower_input for pattern in DANGEROUS_PATTERNS)
+    for pattern in BLOCK_PATTERNS:
+        if re.search(pattern, lower_input):
+            return "blocked"
+    for pattern in SUSPICIOUS_PATTERNS:
+        if re.search(pattern, lower_input):
+            return "suspicious"
+    return "safe"
 
 
 def is_repeated_greeting(user_input: str, chat_history: list) -> bool:
-    """
-    Détecte si l'utilisateur dit plusieurs fois bonjour ou une autre salutation de manière répétée.
-    """
     clean_input = user_input.lower().strip()
     if clean_input in REPEATED_GREETINGS:
         recent_user_msgs = [
@@ -39,9 +52,9 @@ def is_repeated_greeting(user_input: str, chat_history: list) -> bool:
 
 def sanitize_input_for_prompt(user_input: str) -> str:
     """
-    Remplace les expressions sensibles par un tag [censuré] sans bloquer totalement l'entrée.
-    Utile si tu veux adoucir les entrées sans tout rejeter.
+    Remplace les expressions bloquantes par [censuré] pour éviter la fuite involontaire.
     """
-    for pattern in DANGEROUS_PATTERNS:
+    all_patterns = BLOCK_PATTERNS + SUSPICIOUS_PATTERNS
+    for pattern in all_patterns:
         user_input = re.sub(pattern, "[censuré]", user_input, flags=re.IGNORECASE)
     return user_input
