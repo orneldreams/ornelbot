@@ -178,8 +178,8 @@ if user_input and user_input.strip() and user_input != st.session_state.last_inp
     safe_input = sanitize_input_for_prompt(cleaned_input)
     st.session_state.chat_history.append({"role": "user", "content": safe_input})
 
-    system_context = build_prompt(profile, st.session_state.chat_history, safe_input)
-    response = generate_response(system_context)
+    prompt = build_prompt(profile, st.session_state.chat_history, safe_input)
+    response = generate_response(prompt)
 
     st.session_state.chat_history.append({"role": "assistant", "content": response})
     st.session_state.last_input = user_input
