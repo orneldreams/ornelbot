@@ -1,12 +1,11 @@
 import json
 from langdetect import detect
-from utils.notification import notify_once  # Nouvelle fonction importée
-
+from utils.notification import notify_once  # Fonction de notification
 
 def build_prompt(profile: dict, history: list, user_input: str) -> str:
     notify_once()
 
-    # Récupérer les infos essentielles du profil
+    # === Extraction des éléments du profil ===
     intro = profile.get("intro_personnelle", "")
     vision = profile.get("vision", "")
     citation = profile.get("citation", "")
@@ -20,59 +19,57 @@ def build_prompt(profile: dict, history: list, user_input: str) -> str:
     centres_interet = profile.get("centres_interet", [])
     anecdotes = profile.get("anecdotes", [])
 
-    # Détection de la langue du message utilisateur
+    # === Détection de langue ===
     try:
         lang = detect(user_input)
     except:
         lang = "fr"
 
-    # Construit le bloc de contexte initial
+    # === Contexte système pour guider l'IA ===
     system_context = f"""
 Tu es OrnelBot, un assistant personnel qui représente Ornel Rony DIFFO.
 
-Tu peux répondre à des questions générales (comme ChatGPT), mais ton rôle est de parler d'Ornel et de ses projets, quand c'est pertinent.
+Tu peux répondre à des questions générales (comme ChatGPT), mais tu guides la conversation vers ses expériences, projets ou compétences quand c’est pertinent.
 
-Tu t'exprimes de façon {style}, authentique, parfois avec une touche d'humour ou d'énergie.
-Tu privilégies des réponses claires, synthétiques, et humaines, comme si tu parlais à un ami curieux ou à un recruteur intéressé.
+Tu t’exprimes de façon {style}, structurée, accessible, parfois avec une touche d’humour ou d'énergie.
+Tu donnes des réponses claires, humaines, concrètes, en t’appuyant sur ses projets réels, outils utilisés, ou anecdotes.
+
+Langue : {"anglais" if lang == "en" else "français"}.
 """
 
     if lang == "en":
-        system_context += "\nYou must reply in English when the user speaks English."
+        system_context += "\nIf the user writes in English, always reply in English."
     else:
-        system_context += "\nTu réponds en français sauf si l'utilisateur parle anglais."
+        system_context += "\nTu parles français sauf si l’utilisateur écrit en anglais."
 
+    # === Ajout d'informations du profil enrichi ===
     system_context += f"""
 
-Voici quelques infos utiles :
-
+Infos sur Ornel :
 - Intro : {intro}
 - Bio : {bio}
 - Citation : {citation}
 - Vision : {vision}
-- Mode : {mode_mixte}
-- Ambitions : {' | '.join(ambitions)}
-- Impacts clés : {' | '.join(impacts)}
-- Compétences logicielles : {' | '.join(skills[:12]) + '...'}
-- Compétences hardware : {' | '.join(hardware_skills[:12]) + '...'}
-- Centres d'intérêt : {' | '.join(centres_interet)}
-- Anecdotes : {' | '.join(anecdotes[:2])}...
+- Mode d’expression : {mode_mixte}
+- Ambitions : {" | ".join(ambitions)}
+- Impacts concrets : {" | ".join(impacts)}
+- Compétences logicielles : {" | ".join(skills[:10])}...
+- Compétences matérielles : {" | ".join(hardware_skills[:10])}...
+- Centres d’intérêt : {" | ".join(centres_interet)}
+- Anecdotes : {" | ".join(anecdotes[:2])}...
 """
 
-    # Gérer le tout premier message : rendre la conversation plus naturelle
-    greetings = ["salut", "bonjour", "hello", "hi"]
+    # === Gestion des premiers messages ===
+    greetings = ["salut", "bonjour", "yo", "hello", "hi"]
     if len(history) == 0 and user_input.lower().strip() in greetings:
-        history_formatted = "USER: " + user_input + "\nASSISTANT: Salut ! Comment tu vas aujourd'hui ? Dis-moi ce qui t'amène 😊"
+        history_formatted = f"USER: {user_input}\nASSISTANT: Salut ! Content que tu sois là. Comment tu vas aujourd’hui ? Tu veux parler d’un projet, d’un sujet tech ou tu veux juste papoter un peu ?"
     else:
-        # Limiter à 5 derniers échanges pour garder un contexte court
+        # Limiter à 5 derniers échanges
         history = history[-5:]
-
-        # Construire l'historique de la conversation (mémoire)
         history_formatted = "\n".join(f"{m['role'].upper()}: {m['content']}" for m in history)
-
-        # Ajoute le message actuel
         history_formatted += f"\nUSER: {user_input}\nASSISTANT:"
 
-    # Assemble le prompt complet
+    # === Composition finale ===
     full_prompt = f"""{system_context}
 
 Conversation :
