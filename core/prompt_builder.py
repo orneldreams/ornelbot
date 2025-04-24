@@ -12,7 +12,11 @@ def build_prompt(profile: dict, history: list, user_input: str) -> str:
     citation = profile.get("citation", "")
     bio = profile.get("bio", "")
     mode_mixte = profile.get("mode_mixte", "")
-    style = profile.get("style_conversation", "naturel et humain")
+    style = profile.get("repond_comme", "naturel et humain")
+    ambitions = profile.get("ambitions", [])
+    impacts = profile.get("impacts", [])
+    skills = profile.get("skills", [])
+    hardware_skills = profile.get("hardware_skills", [])
 
     # Détection de la langue du message utilisateur
     try:
@@ -44,6 +48,10 @@ Voici quelques infos utiles :
 - Citation : {citation}
 - Vision : {vision}
 - Mode : {mode_mixte}
+- Ambitions : {' | '.join(ambitions)}
+- Impacts clés : {' | '.join(impacts)}
+- Compétences logicielles : {' | '.join(skills[:10]) + '...'}
+- Compétences hardware : {' | '.join(hardware_skills[:10]) + '...'}
 """
 
     # Limiter à 5 derniers échanges pour garder un contexte court
