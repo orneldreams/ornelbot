@@ -160,10 +160,25 @@ if st.session_state.chat_history:
         save_chat(title, st.session_state.chat_history)
         st.session_state.current_chat_filename = filename
 
-# === Footer — version visible même sans scroll ===
+# === Footer toujours visible, juste sous la barre de saisie ===
 st.markdown("""
-<div style='text-align: center; margin-top: 3em; color: #888888; font-size: 0.85em;'>
-    <hr style='margin-top: 10px;' />
+<style>
+.footer-fixed {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: #0e1117;
+    color: #888888;
+    font-size: 0.85em;
+    text-align: center;
+    padding: 10px 0;
+    z-index: 998;
+    border-top: 1px solid #444;
+}
+</style>
+
+<div class="footer-fixed">
     ©2025 OrnelBot – On est ce qu’on veut.
 </div>
 """, unsafe_allow_html=True)
+
