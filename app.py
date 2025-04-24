@@ -47,6 +47,10 @@ def handle_greeting_level(chat_history):
     else:
         return "Toujours chaud pour te parler, mais changeons de disque 😎 Tu veux que je t’aide sur un sujet précis ?"
 
+def is_greeting_only(text):
+    greetings = {"bonjour", "salut", "yo", "hello", "hi", "coucou", "rebonjour"}
+    return text.lower().strip() in greetings
+
 # === Initialisation ===
 st.set_page_config(page_title="OrnelBot", page_icon="🤖", layout="centered")
 st.markdown("""
@@ -123,10 +127,11 @@ if bot_avatar:
 else:
     st.warning("Avatar du bot manquant.")
 
-# === Message d'accueil ===
+# === Message d'accueil (non ajouté à l'historique) ===
 if not st.session_state.greeted and bot_avatar:
     welcome_message = "Salut ! Je suis OrnelBot. Pose-moi n'importe quelle question sur mes projets, mes compétences ou des sujets généraux."
-    st.session_state.chat_history.append({"role": "assistant", "content": welcome_message})
+    with st.chat_message("assistant", avatar=bot_avatar):
+        st.markdown(welcome_message)
     st.session_state.greeted = True
 
 # === Affichage historique ===
@@ -139,6 +144,18 @@ for message in st.session_state.chat_history:
 user_input = st.chat_input("Tape ton message ici...")
 
 if user_input and user_input.strip() and user_input != st.session_state.last_input:
+
+    if is_greeting_only(user_input) and len([msg for msg in st.session_state.chat_history if msg["role"] == "user"]) == 0:
+        short_reply = "Salut 👋 Tu peux me poser une question ou parler d’un projet si tu veux."
+        st.session_state.chat_history.append({"role": "user", "content": user_input})
+        st.session_state.chat_history.append({"role": "assistant", "content": short_reply})
+        st.session_state.last_input = user_input
+        with st.chat_message("user", avatar=user_avatar):
+            st.markdown(user_input)
+        with st.chat_message("assistant", avatar=bot_avatar):
+            st.markdown(short_reply)
+        st.stop()
+
     level = check_security_level(user_input)
 
     if level == "blocked":
