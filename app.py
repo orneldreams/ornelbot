@@ -45,6 +45,14 @@ def clean_user_input(text):
 
 # === Initialisation ===
 st.set_page_config(page_title="OrnelBot", page_icon="🤖", layout="centered")
+st.markdown("""
+    <link rel="manifest" href="/public/manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="OrnelBot">
+    <meta name="theme-color" content="#0d1117">
+""", unsafe_allow_html=True)
+
 inject_css()
 profile = load_profile()
 

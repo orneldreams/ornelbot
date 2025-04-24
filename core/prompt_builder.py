@@ -17,6 +17,8 @@ def build_prompt(profile: dict, history: list, user_input: str) -> str:
     impacts = profile.get("impacts", [])
     skills = profile.get("skills", [])
     hardware_skills = profile.get("hardware_skills", [])
+    centres_interet = profile.get("centres_interet", [])
+    anecdotes = profile.get("anecdotes", [])
 
     # Détection de la langue du message utilisateur
     try:
@@ -50,8 +52,10 @@ Voici quelques infos utiles :
 - Mode : {mode_mixte}
 - Ambitions : {' | '.join(ambitions)}
 - Impacts clés : {' | '.join(impacts)}
-- Compétences logicielles : {' | '.join(skills[:10]) + '...'}
-- Compétences hardware : {' | '.join(hardware_skills[:10]) + '...'}
+- Compétences logicielles : {' | '.join(skills[:12]) + '...'}
+- Compétences hardware : {' | '.join(hardware_skills[:12]) + '...'}
+- Centres d'intérêt : {' | '.join(centres_interet)}
+- Anecdotes : {' | '.join(anecdotes[:2])}...
 """
 
     # Gérer le tout premier message : rendre la conversation plus naturelle
