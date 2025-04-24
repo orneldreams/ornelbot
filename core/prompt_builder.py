@@ -54,14 +54,19 @@ Voici quelques infos utiles :
 - Compétences hardware : {' | '.join(hardware_skills[:10]) + '...'}
 """
 
-    # Limiter à 5 derniers échanges pour garder un contexte court
-    history = history[-5:]
+    # Gérer le tout premier message : rendre la conversation plus naturelle
+    greetings = ["salut", "bonjour", "hello", "hi"]
+    if len(history) == 0 and user_input.lower().strip() in greetings:
+        history_formatted = "USER: " + user_input + "\nASSISTANT: Salut ! Comment tu vas aujourd'hui ? Dis-moi ce qui t'amène 😊"
+    else:
+        # Limiter à 5 derniers échanges pour garder un contexte court
+        history = history[-5:]
 
-    # Construire l'historique de la conversation (mémoire)
-    history_formatted = "\n".join(f"{m['role'].upper()}: {m['content']}" for m in history)
+        # Construire l'historique de la conversation (mémoire)
+        history_formatted = "\n".join(f"{m['role'].upper()}: {m['content']}" for m in history)
 
-    # Ajoute le message actuel
-    history_formatted += f"\nUSER: {user_input}\nASSISTANT:"
+        # Ajoute le message actuel
+        history_formatted += f"\nUSER: {user_input}\nASSISTANT:"
 
     # Assemble le prompt complet
     full_prompt = f"""{system_context}
