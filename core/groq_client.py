@@ -8,7 +8,7 @@ if os.getenv("RAILWAY_ENVIRONMENT") is None:
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-def generate_response(prompt: str) -> str:
+def generate_response(system_context: str, user_conversation: str) -> str:
     if not GROQ_API_KEY:
         return "❌ Erreur : la clé API GROQ est introuvable."
 
@@ -20,7 +20,8 @@ def generate_response(prompt: str) -> str:
     payload = {
         "model": "llama3-70b-8192",
         "messages": [
-            {"role": "user", "content": prompt}
+            {"role": "system", "content": system_context},
+            {"role": "user", "content": user_conversation}
         ],
         "temperature": 0.7
     }

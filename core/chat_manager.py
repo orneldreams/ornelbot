@@ -1,16 +1,22 @@
 import os
 import json
+import re
 from datetime import datetime
 
 CHAT_DIR = "chats"
 
+def extract_title_from_history(history):
+    """
+    Extrait un titre simple à partir des 3 premiers messages du chat.
+    """
+    text = " ".join(m["content"] for m in history[:3] if "content" in m).lower()
+    keywords = re.findall(r'\b\w+\b', text)
+    stopwords = {"le", "la", "les", "de", "des", "un", "une", "en", "et", "avec", "je", "tu", "il", "elle", "on", "que"}
+    filtered = [w for w in keywords if w not in stopwords]
+    title = "_".join(filtered[:6]) if filtered else "discussion"
+    return title.capitalize()
+
 def list_chats():
-    """
-    Retourne une liste de dictionnaires contenant :
-    - filename
-    - title
-    - date (datetime)
-    """
     if not os.path.exists(CHAT_DIR):
         os.makedirs(CHAT_DIR)
 
@@ -37,22 +43,30 @@ def list_chats():
     return chats
 
 def load_chat(filename):
-    """
-    Charge le contenu d'un chat depuis un fichier JSON.
-    """
     path = os.path.join(CHAT_DIR, filename)
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
 def save_chat(title, messages):
     """
-    Sauvegarde un chat avec un nom basé sur l'heure et le titre.
+    Sauvegarde un chat. Si aucun titre n'est donné, génère un titre depuis l'historique.
+    Retourne le nom de fichier utilisé.
     """
     if not os.path.exists(CHAT_DIR):
         os.makedirs(CHAT_DIR)
+
+    if not title:
+        title = extract_title_from_history(messages)
+
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     safe_title = title.replace(" ", "_").replace("/", "-")[:30]
-    filename = f"{timestamp}_{safe_title}.json"
+    base_filename = f"{timestamp}_{safe_title}"
+    filename = f"{base_filename}.json"
+    i = 1
+    while os.path.exists(os.path.join(CHAT_DIR, filename)):
+        filename = f"{base_filename}_{i}.json"
+        i += 1
+
     data = {
         "title": title,
         "date": datetime.now().isoformat(),
@@ -60,6 +74,7 @@ def save_chat(title, messages):
     }
     with open(os.path.join(CHAT_DIR, filename), "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+    return filename
 
 def delete_chat(filename):
     path = os.path.join(CHAT_DIR, filename)
@@ -76,7 +91,8 @@ def rename_chat(filename, new_title):
             data = json.load(f)
         data["title"] = new_title
 
-        new_filename = f"{filename.split('_')[0]}_{new_title.replace(' ', '_')}.json"
+        prefix = filename.split("_")[0]
+        new_filename = f"{prefix}_{new_title.replace(' ', '_')}.json"
         new_path = os.path.join(CHAT_DIR, new_filename)
 
         with open(new_path, "w", encoding="utf-8") as f:

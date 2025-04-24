@@ -2,7 +2,7 @@ import json
 from langdetect import detect
 from utils.notification import notify_once  # Fonction de notification
 
-def build_prompt(profile: dict, history: list, user_input: str) -> str:
+def build_prompt(profile: dict, history: list, user_input: str):
     notify_once()
 
     # === Extraction des éléments du profil ===
@@ -25,7 +25,7 @@ def build_prompt(profile: dict, history: list, user_input: str) -> str:
     except:
         lang = "fr"
 
-    # === Contexte système pour guider l'IA ===
+    # === Contexte système ===
     system_context = f"""
 Tu es OrnelBot, un assistant personnel qui représente Ornel Rony DIFFO.
 
@@ -42,7 +42,6 @@ Langue : {"anglais" if lang == "en" else "français"}.
     else:
         system_context += "\nTu parles français sauf si l’utilisateur écrit en anglais."
 
-    # === Ajout d'informations du profil enrichi ===
     system_context += f"""
 
 Infos sur Ornel :
@@ -51,29 +50,21 @@ Infos sur Ornel :
 - Citation : {citation}
 - Vision : {vision}
 - Mode d’expression : {mode_mixte}
-- Ambitions : {" | ".join(ambitions)}
-- Impacts concrets : {" | ".join(impacts)}
+- Ambitions : {" | ".join(ambitions or [])}
+- Impacts concrets : {" | ".join(impacts or [])}
 - Compétences logicielles : {" | ".join(skills[:10])}...
 - Compétences matérielles : {" | ".join(hardware_skills[:10])}...
-- Centres d’intérêt : {" | ".join(centres_interet)}
+- Centres d’intérêt : {" | ".join(centres_interet or [])}
 - Anecdotes : {" | ".join(anecdotes[:2])}...
 """
 
-    # === Gestion des premiers messages ===
+    # === Formattage de la conversation utilisateur ===
     greetings = ["salut", "bonjour", "yo", "hello", "hi"]
     if len(history) == 0 and user_input.lower().strip() in greetings:
-        history_formatted = f"USER: {user_input}\nASSISTANT: Salut ! Content que tu sois là. Comment tu vas aujourd’hui ? Tu veux parler d’un projet, d’un sujet tech ou tu veux juste papoter un peu ?"
+        user_conversation = f"USER: {user_input}\nASSISTANT: Salut ! Content que tu sois là. Comment tu vas aujourd’hui ? Tu veux parler d’un projet, ou tu veux juste discuter un peu ?"
     else:
-        # Limiter à 5 derniers échanges
         history = history[-5:]
-        history_formatted = "\n".join(f"{m['role'].upper()}: {m['content']}" for m in history)
-        history_formatted += f"\nUSER: {user_input}\nASSISTANT:"
+        user_conversation = "\n".join(f"{m['role'].upper()}: {m['content']}" for m in history)
+        user_conversation += f"\nUSER: {user_input}\nASSISTANT:"
 
-    # === Composition finale ===
-    full_prompt = f"""{system_context}
-
-Conversation :
-{history_formatted}
-"""
-
-    return full_prompt
+    return system_context.strip(), user_conversation.strip()
