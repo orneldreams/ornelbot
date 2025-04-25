@@ -18,6 +18,10 @@ def build_prompt(profile: dict, history: list, user_input: str):
     hardware_skills = profile.get("hardware_skills", [])
     centres_interet = profile.get("centres_interet", [])
     anecdotes = profile.get("anecdotes", [])
+    ameliorations = profile.get("ameliorations_importantes", [])
+    tech_stack = profile.get("tech_stack", {})
+    limitations = profile.get("limitations_connues", [])
+    liens = profile.get("liens", {})
 
     # === Détection de langue ===
     try:
@@ -25,37 +29,36 @@ def build_prompt(profile: dict, history: list, user_input: str):
     except:
         lang = "fr"
 
-    # === Contexte système ===
+    # === Contexte système enrichi ===
     system_context = f"""
 Tu es OrnelBot, un assistant personnel qui représente Ornel Rony DIFFO.
 
 Tu peux répondre à des questions générales (comme ChatGPT), mais tu guides la conversation vers ses expériences, projets ou compétences quand c’est pertinent.
+Tu intègres les critiques précédentes pour montrer ton amélioration continue (ex : bonjour répété, sécurité, prompt injection...).
 
 Tu t’exprimes de façon {style}, structurée, accessible, parfois avec une touche d’humour ou d'énergie.
 Tu donnes des réponses claires, humaines, concrètes, en t’appuyant sur ses projets réels, outils utilisés, ou anecdotes.
 
 Langue : {"anglais" if lang == "en" else "français"}.
-"""
+{"If the user writes in English, always reply in English." if lang == "en" else "Tu parles français sauf si l’utilisateur écrit en anglais."}
 
-    if lang == "en":
-        system_context += "\nIf the user writes in English, always reply in English."
-    else:
-        system_context += "\nTu parles français sauf si l’utilisateur écrit en anglais."
-
-    system_context += f"""
-
-Infos sur Ornel :
+Profil de Ornel :
 - Intro : {intro}
 - Bio : {bio}
 - Citation : {citation}
 - Vision : {vision}
 - Mode d’expression : {mode_mixte}
-- Ambitions : {" | ".join(ambitions or [])}
-- Impacts concrets : {" | ".join(impacts or [])}
+- Ambitions : {" | ".join(ambitions)}
+- Impacts concrets : {" | ".join(impacts)}
 - Compétences logicielles : {" | ".join(skills[:10])}...
 - Compétences matérielles : {" | ".join(hardware_skills[:10])}...
-- Centres d’intérêt : {" | ".join(centres_interet or [])}
+- Centres d’intérêt : {" | ".join(centres_interet)}
 - Anecdotes : {" | ".join(anecdotes[:2])}...
+- Améliorations : {" | ".join(ameliorations)}
+- Limitations connues : {" | ".join(limitations)}
+- Tech Stack : {tech_stack.get("framework")} + Python {tech_stack.get("python_version")} + LLM {tech_stack.get("llm")}
+- GitHub projets récents : {liens.get("github")}
+- LinkedIn : {liens.get("linkedin")}
 """
 
     # === Formattage de la conversation utilisateur ===

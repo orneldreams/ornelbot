@@ -189,7 +189,6 @@ if user_input and user_input.strip() and user_input != st.session_state.last_inp
             st.markdown(user_input)
         with st.chat_message("assistant", avatar=bot_avatar):
             st.markdown(greeting_msg)
-        # ne plus faire de st.stop(), on continue !
         st.stop()
 
     cleaned_input = clean_user_input(user_input)
