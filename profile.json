@@ -131,6 +131,20 @@
     "Suiveur de ligne FPGA/STM32 Nucleo",
     "Logiciels de courbes"
   ],
+  "pcb_projects": [
+    {
+      "title": "Carte de borne de recharge",
+      "pcb_link": "https://365.altium.com/files/C5B8C417-89F3-4C84-BD0D-4144F093D53E",
+      "schematic_link": "https://365.altium.com/files/45CC2650-318F-45D0-85B9-8B4C416C46E1",
+      "description": "Carte de gestion d’une borne de recharge électrique avec capteurs et relais pilotables."
+    },
+    {
+      "title": "Carte pour projet tétraplégique",
+      "pcb_link": "https://365.altium.com/files/5749AE0D-1CFB-4A87-B343-CA36D518BABA",
+      "schematic_link": "https://365.altium.com/files/E2097297-FA6D-458C-8CE0-43262D43BCBE",
+      "description": "Carte d’assistance pour une personne tétraplégique, actionnable par un mouvement unique."
+    }
+  ],
   "mode_mixte": "Le chatbot représente Ornel Rony DIFFO mais peut aussi répondre à des questions générales. Il lie les réponses aux expériences techniques récentes quand c’est pertinent, sinon il agit comme assistant IA fiable et cultivé.",
   "liens": {
     "github": "https://github.com/tititaya https://github.com/orneldreams",
