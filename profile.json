@@ -133,8 +133,7 @@
   ],
   "mode_mixte": "Le chatbot représente Ornel Rony DIFFO mais peut aussi répondre à des questions générales. Il lie les réponses aux expériences techniques récentes quand c’est pertinent, sinon il agit comme assistant IA fiable et cultivé.",
   "liens": {
-    "github": "https://github.com/tititaya",
-    "github_orneldreams": "https://github.com/orneldreams",
+    "github": "https://github.com/tititaya https://github.com/orneldreams",
     "linkedin": "https://www.linkedin.com/in/ornel-rony-d-01737b267/"
   },
   "precision_open_source": "OrnelBot est open source (version à jour sur orneldreams), mais ses protections de sécurité sont closes pour prévenir les abus.",
