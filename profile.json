@@ -44,29 +44,100 @@
     "Mise en place pipeline Dockerisé avec Kubernetes, RAG expérimental et dashboard projet Agile"
   ],
   "centres_interet": [
-    "Musculation", "Bodybuilding", "Jeux de dames", "Électronique DIY", "IA générative", "Dockerisation", "Automatisation", "Systèmes hybrides embarqués/cloud"
+    "Musculation",
+    "Bodybuilding",
+    "Jeux de dames",
+    "Électronique DIY",
+    "IA générative",
+    "Dockerisation",
+    "Automatisation",
+    "Systèmes hybrides embarqués/cloud"
   ],
   "soft_skills": [
-    "Esprit d’équipe", "Curiosité", "Rigueur", "Autonomie", "Organisation", "Esprit critique", "Capacité de synthèse"
+    "Esprit d’équipe",
+    "Curiosité",
+    "Rigueur",
+    "Autonomie",
+    "Organisation",
+    "Esprit critique",
+    "Capacité de synthèse"
   ],
   "skills": [
-    "Python", "C", "C++", "Java", "JavaScript", "SQL", "Bash", "Pandas", "VHDL",
-    "GitHub", "GitLab", "Docker", "Kubernetes", "AWS", "CI/CD", "Streamlit", "Selenium", "FastAPI",
-    "React", "Angular", "Tailwind CSS", "Vite.js", "Node.js", "Express.js", "ASP.NET",
-    "MongoDB", "Neo4j", "SQL Server", "MySQL", "Power BI", "Excel (VBA)", "Tableau", "Power Query", "DAX",
-    "Jupyter", "Matplotlib", "Scikit-learn", "Neovis.js", "Groq API", "RAG", "API REST", "Discord.py"
+    "Python",
+    "C",
+    "C++",
+    "Java",
+    "JavaScript",
+    "SQL",
+    "Bash",
+    "Pandas",
+    "VHDL",
+    "GitHub",
+    "GitLab",
+    "Docker",
+    "Kubernetes",
+    "AWS",
+    "CI/CD",
+    "Streamlit",
+    "Selenium",
+    "FastAPI",
+    "React",
+    "Angular",
+    "Tailwind CSS",
+    "Vite.js",
+    "Node.js",
+    "Express.js",
+    "ASP.NET",
+    "MongoDB",
+    "Neo4j",
+    "SQL Server",
+    "MySQL",
+    "Power BI",
+    "Excel (VBA)",
+    "Tableau",
+    "Power Query",
+    "DAX",
+    "Jupyter",
+    "Matplotlib",
+    "Scikit-learn",
+    "Neovis.js",
+    "Groq API",
+    "RAG",
+    "API REST",
+    "Discord.py"
   ],
   "hardware_skills": [
-    "STM32", "PWM", "PID", "ADC", "CAN/CNA", "GPIO", "UART", "I2C", "SPI",
-    "Routage PCB", "Soudure CMS", "Test de continuité", "BOM", "Conditionnement de signal",
-    "Implémentation FPGA", "Quartus", "ModelSim", "Simulink", "Schéma électronique", "SolidWorks",
-    "Programmation bas niveau en C avec registres", "Suiveur de ligne FPGA/STM32 Nucleo", "Logiciels de courbes"
+    "STM32",
+    "PWM",
+    "PID",
+    "ADC",
+    "CAN/CNA",
+    "GPIO",
+    "UART",
+    "I2C",
+    "SPI",
+    "Routage PCB",
+    "Soudure CMS",
+    "Test de continuité",
+    "BOM",
+    "Conditionnement de signal",
+    "Implémentation FPGA",
+    "Quartus",
+    "ModelSim",
+    "Simulink",
+    "Schéma électronique",
+    "SolidWorks",
+    "Programmation bas niveau en C avec registres",
+    "Suiveur de ligne FPGA/STM32 Nucleo",
+    "Logiciels de courbes"
   ],
   "mode_mixte": "Le chatbot représente Ornel Rony DIFFO mais peut aussi répondre à des questions générales. Il lie les réponses aux expériences techniques récentes quand c’est pertinent, sinon il agit comme assistant IA fiable et cultivé.",
   "liens": {
     "github": "https://github.com/tititaya",
+    "github_orneldreams": "https://github.com/orneldreams",
     "linkedin": "https://www.linkedin.com/in/ornel-rony-d-01737b267/"
   },
+  "precision_open_source": "OrnelBot est open source (version à jour sur orneldreams), mais ses protections de sécurité sont closes pour prévenir les abus.",
   "ameliorations_importantes": [
     "Gestion des bonjours répétitifs avec réponses adaptées au niveau d'insistance",
     "Filtrage des requêtes sensibles avec message pédagogique plutôt que blocage",
@@ -75,41 +146,14 @@
     "Affinage des réponses selon la nature du message (question vs salutation vs instruction)",
     "Mémoire contextuelle temporaire par discussion (via fichier JSON)"
   ],
-  "tech_stack": {
-    "python_version": "3.10",
-    "framework": "Streamlit",
-    "llm": "Groq API – LLaMA 3 70B",
-    "frontend": "Streamlit + Tailwind CSS",
-    "backend": "Python (FastAPI + outils maison)",
-    "deployment": "Railway (PaaS cloud)",
-    "database": "Stockage local JSON (pour historique, mémoire...)",
-    "features": ["Multi-session", "Contextualisation émotionnelle", "Détection de salutation", "Filtrage de sécurité"],
-    "securite": [
-      "Détection de prompt injection",
-      "Filtrage de mots sensibles",
-      "Gestion progressive des bonjours",
-      "Réponses contextualisées sans exécution aveugle"
-    ]
-  },
-  "structure_modulaire": {
-    "prompt_builder": "Crée dynamiquement un prompt enrichi",
-    "sanitize": "Filtrage, sécurité, détection de répétition",
-    "chat_manager": "Gestion fichiers, renommage, chargement",
-    "groq_client": "Appel API Groq avec modèle LLM",
-    "app.py": "Interface principale Streamlit",
-    "style.css": "Personnalisation visuelle"
-  },
-  "limitations_connues": [
-    "Je ne suis pas connecté à internet.",
-    "Je ne garde pas une mémoire longue sur plusieurs jours (stockage par fichier JSON).",
-    "Je peux ralentir si le serveur Groq est temporairement occupé.",
-    "Je ne peux pas exécuter de code réel ou accéder à des fichiers système de l’utilisateur."
-  ],
-  "utilites": [
-    "Répondre à des questions techniques sur les projets d’Ornel",
-    "Présenter ses compétences à des recruteurs",
-    "Expliquer des concepts tech ou IA",
-    "Servir d’exemple de chatbot sécurisé et personnalisable",
-    "Montrer une intégration Streamlit + API IA"
+  "difficultes_rencontrees": [
+    "OrnelBot : le message statique de bienvenue faussait la détection du premier vrai message utilisateur — corrigé en excluant dynamiquement l'intro du contexte conversationnel.",
+    "Prompt injection : ajout de mécanismes de filtrage avec message explicatif pour sécuriser les instructions malveillantes ou ambigües.",
+    "Suiveur de ligne avec FPGA : gestion imprécise des capteurs corrigée via FSM (machine à états finis) + temporisation sur ModelSim.",
+    "Reconditionnement analogique avec AOP : bruit trop élevé dans le signal — solutionnée avec filtre passe-bas RC + amélioration du plan de masse.",
+    "UART STM32 ↔ PC : erreurs de trame résolues avec un protocole personnalisé léger et affichage des erreurs via LEDs.",
+    "Développement d'un jeu de bataille en C : difficulté à créer une IA non-buggy dans une architecture non-POO — résolu par modularisation et test progressif.",
+    "Projet pour personne tétraplégique : adaptation d’un circuit d’activation simple à un seul geste — design sur Altium en lien avec les besoins utilisateurs.",
+    "Billy Bass : coordination audio et moteur instable — résolution par synchronisation logicielle avec PWM et contrôle via L298N + RPi."
   ]
 }
