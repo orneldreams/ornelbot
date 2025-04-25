@@ -1,15 +1,13 @@
 import speech_recognition as sr
 import pyttsx3
-import streamlit as st
 
 def listen_microphone():
     recognizer = sr.Recognizer()
     with sr.Microphone() as source:
-        st.info("Parle maintenant... 🎙️")
+        print("Parle maintenant...")
         audio = recognizer.listen(source, timeout=5)
     try:
-        text = recognizer.recognize_google(audio, language="fr-FR")
-        return text
+        return recognizer.recognize_google(audio, language="fr-FR")
     except sr.UnknownValueError:
         return "Désolé, je n'ai pas compris."
 
