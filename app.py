@@ -10,7 +10,7 @@ from core.prompt_builder import build_prompt
 from core.groq_client import generate_response
 from core.chat_manager import list_chats, load_chat, save_chat, delete_chat, rename_chat
 from utils.sanitize import check_security_level, is_repeated_greeting, sanitize_input_for_prompt
-from utils.voice import listen_microphone, speak_response
+#=====from utils.voice import listen_microphone, speak_response
 
 # === Fonctions utilitaires ===
 def load_profile():
@@ -209,22 +209,7 @@ if user_input and user_input.strip() and user_input != st.session_state.last_inp
 
 # === 🔊 Fonctionnalités vocales ===
 st.divider()
-st.subheader("🎤 Interactions vocales")
-
-if st.button("🎙️ Parler"):
-    user_input = listen_microphone()
-    if user_input and user_input.strip():
-        st.session_state.chat_history.append({"role": "user", "content": user_input})
-        st.write(f"📝 Texte reconnu : {user_input}")
-        system_context, user_conversation = build_prompt(profile, st.session_state.chat_history, user_input)
-        response = generate_response(system_context, user_conversation)
-        st.session_state.chat_history.append({"role": "assistant", "content": response})
-        with st.chat_message("assistant", avatar=bot_avatar):
-            st.markdown(response)
-
-if st.button("🔉 Lire la réponse"):
-    if st.session_state.chat_history and st.session_state.chat_history[-1]["role"] == "assistant":
-        speak_response(st.session_state.chat_history[-1]["content"])
+st.subheader("🎤")
 
 # === Sauvegarde automatique ===
 if st.session_state.chat_history:
